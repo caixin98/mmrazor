@@ -9,49 +9,6 @@ dataset_type = 'Celeb'
 num_classes = 93955
 img_norm_cfg = dict(
     mean=[127.5, 127.5, 127.5], std=[128.0, 128.0, 128.0], to_rgb=True)
-train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='Resize', size=(172, 172)),
-    dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
-    dict(type='CenterCrop', crop_size=(112, 96)),
-    dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
-    dict(
-        type='Propagated',
-        mask2sensor=0.002,
-        scene2mask=0.4,
-        object_height=0.27,
-        sensor='IMX250',
-        single_psf=False,
-        grayscale=False,
-        input_dim=[112, 96, 3],
-        output_dim=[308, 257, 3]),
-    dict(type='ToTensor', keys=['gt_label']),
-    dict(type='Collect', keys=['img', 'gt_label'])
-]
-test_pipeline = [
-    dict(type='LoadImagePair'),
-    dict(
-        type='FlipPair',
-        keys=['img1', 'img2'],
-        keys_flip=['img1_flip', 'img2_flip']),
-    dict(
-        type='Propagated',
-        keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
-        mask2sensor=0.002,
-        scene2mask=0.4,
-        object_height=0.27,
-        sensor='IMX250',
-        single_psf=False,
-        grayscale=False,
-        input_dim=[112, 96, 3],
-        output_dim=[308, 257, 3]),
-    dict(type='ToTensor', keys=['fold', 'label']),
-    dict(
-        type='StackImagePair',
-        keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
-        out_key='img'),
-    dict(type='Collect', keys=['img', 'fold', 'label'])
-]
 train_dir = '/mnt/workspace/RawSense/data/celebrity/'
 train_imglist = '/mnt/workspace/RawSense/data/celebrity/celebrity_data.txt'
 train_ann_file = '/mnt/workspace/RawSense/data/celebrity/celebrity_label.txt'
@@ -135,7 +92,7 @@ data = dict(
                 grayscale=False,
                 input_dim=[112, 96, 3],
                 output_dim=[308, 257, 3]),
-            dict(type='TorchAffineRTS', angle=(0, 0), prob=1.0),
+            dict(type='TorchAffineRTS', angle=(0, 30), prob=1.0),
             dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
@@ -146,13 +103,21 @@ data = dict(
     train_dataloader=dict(samples_per_gpu=140),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
-optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
+custom_hooks = [
+    dict(type='VisualConvHook', do_distall=True),
+    dict(type='VisualAfterOpticalHook', do_distall=True)
+]
+optimizer = dict(type='AdamW', lr=0.0005, weight_decay=0.05)
 lr_config = dict(
-    policy='CosineAnnealing',
-    min_lr=0,
+    policy='CosineAnnealingCooldown',
+    min_lr=1e-05,
+    cool_down_time=10,
+    cool_down_ratio=0.1,
+    by_epoch=True,
+    warmup_by_epoch=True,
     warmup='linear',
-    warmup_iters=20000,
-    warmup_ratio=0.25)
+    warmup_iters=10,
+    warmup_ratio=1e-06)
 checkpoint_config = dict(interval=10)
 runner = dict(type='EpochBasedRunner', max_epochs=100)
 evaluation = dict(interval=1, metric='accuracy')

@@ -119,17 +119,13 @@ custom_hooks = [
     dict(type='VisualConvHook',do_distall=True),
     dict(type='VisualAfterOpticalHook', do_distall=True),
 ]
-optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
+optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
 lr_config = dict(
-    policy='CosineAnnealingCooldown',
-    min_lr=1e-5,
-    cool_down_time=10,
-    cool_down_ratio=0.1,
-    by_epoch=True,
-    warmup_by_epoch=True,
+    policy='CosineAnnealing',
+    min_lr=0,
     warmup='linear',
-    warmup_iters=10,
-    warmup_ratio=1e-6)
+    warmup_iters=20000,
+    warmup_ratio=0.25)
 checkpoint_config = dict(interval=10)
 runner = dict(type='EpochBasedRunner', max_epochs=100)
 evaluation = dict(interval=1, metric='accuracy')

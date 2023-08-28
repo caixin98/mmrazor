@@ -1,9 +1,9 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_sgd.py',
+    '../../_base_/datasets/face/celeb_propagate.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
-    type='CropRotatePsfConv',
+    type='SteerPsfConv',
     feature_size=2.76e-05,
     sensor='IMX250',
     input_shape=[3, 306, 255],
@@ -12,7 +12,8 @@ optical = dict(
     target_dim=[164, 128],
     requires_grad=True,
     down="resize",
-    noise_type=None,
+    noise_type="gaussian",
+    split_psf=(3,3),
     angle = 30,
     # do_affine=True,
     n_psf_mask=1)
