@@ -29,7 +29,7 @@ no_optical = dict(
     requires_grad=True,
     use_stn=False,
     down="resize",
-    noise_type="gaussian",
+    noise_type=None,
     n_psf_mask=1)
 
 
