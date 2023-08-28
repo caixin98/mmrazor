@@ -120,3 +120,4 @@ venv.bak/
 # Srun
 *.out
 batchscript-*
+logs/**
