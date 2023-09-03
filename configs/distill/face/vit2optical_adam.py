@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_sgd.py',
+    '../../_base_/datasets/face/celeb_propagate.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(

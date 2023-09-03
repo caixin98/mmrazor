@@ -107,17 +107,13 @@ custom_hooks = [
     dict(type='VisualConvHook', do_distall=True),
     dict(type='VisualAfterOpticalHook', do_distall=True)
 ]
-optimizer = dict(type='AdamW', lr=0.0005, weight_decay=0.05)
+optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
 lr_config = dict(
-    policy='CosineAnnealingCooldown',
-    min_lr=1e-05,
-    cool_down_time=10,
-    cool_down_ratio=0.1,
-    by_epoch=True,
-    warmup_by_epoch=True,
+    policy='CosineAnnealing',
+    min_lr=0,
     warmup='linear',
-    warmup_iters=10,
-    warmup_ratio=1e-06)
+    warmup_iters=20000,
+    warmup_ratio=0.25)
 checkpoint_config = dict(interval=10)
 runner = dict(type='EpochBasedRunner', max_epochs=100)
 evaluation = dict(interval=1, metric='accuracy')
@@ -133,7 +129,7 @@ optical = dict(
     target_dim=[164, 128],
     requires_grad=True,
     down='resize',
-    noise_type=None,
+    noise_type='gaussian',
     angle=30,
     n_psf_mask=1)
 no_optical = dict(
@@ -148,7 +144,7 @@ no_optical = dict(
     requires_grad=True,
     use_stn=False,
     down='resize',
-    noise_type='gaussian',
+    noise_type=None,
     n_psf_mask=1)
 student = dict(
     type='mmcls.AffineFaceImageClassifier',
@@ -164,7 +160,7 @@ student = dict(
             target_dim=[164, 128],
             requires_grad=True,
             down='resize',
-            noise_type=None,
+            noise_type='gaussian',
             angle=30,
             n_psf_mask=1),
         image_size=168),
@@ -192,7 +188,7 @@ teacher = dict(
             requires_grad=True,
             use_stn=False,
             down='resize',
-            noise_type='gaussian',
+            noise_type=None,
             n_psf_mask=1),
         apply_affine=True,
         image_size=168),
@@ -227,7 +223,7 @@ algorithm = dict(
                     target_dim=[164, 128],
                     requires_grad=True,
                     down='resize',
-                    noise_type=None,
+                    noise_type='gaussian',
                     angle=30,
                     n_psf_mask=1),
                 image_size=168),
@@ -259,7 +255,7 @@ algorithm = dict(
                     requires_grad=True,
                     use_stn=False,
                     down='resize',
-                    noise_type='gaussian',
+                    noise_type=None,
                     n_psf_mask=1),
                 apply_affine=True,
                 image_size=168),
