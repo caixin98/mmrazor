@@ -1,20 +1,19 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_sgd.py',
+    '../../_base_/datasets/face/celeb_propagate.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
-    type='CropRotatePsfConv',
+    type='SoftPsfConv',
     feature_size=2.76e-05,
     sensor='IMX250',
-    input_shape=[3, 306, 255],
+    input_shape=[3, 308, 257],
     scene2mask=0.4,
     mask2sensor=0.002,
     target_dim=[164, 128],
     requires_grad=True,
+    use_stn=False,
     down="resize",
     noise_type="gaussian",
-    angle = 30,
-    # do_affine=True,
     n_psf_mask=1)
 no_optical = dict(
     type='SoftPsfConv',
@@ -85,12 +84,12 @@ algorithm = dict(
                     dict(
                         type='DistanceWiseRKD',
                         name='distance_wise_loss',
-                        loss_weight=100.0,
+                        loss_weight=0.0,
                         with_l2_norm=True),
                     dict(
                         type='AngleWiseRKD',
                         name='angle_wise_loss',
-                        loss_weight=200.0,
+                        loss_weight=0.0,
                         with_l2_norm=True),
                 ])
         ]),

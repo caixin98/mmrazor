@@ -10,7 +10,7 @@ except (ImportError, ModuleNotFoundError):
     mmseg = None
 
 from mmcls.models import *  # noqa: F401,F403
-
+from mmpose.models import *  # noqa: F401,F403
 from .algorithms import *  # noqa: F401,F403
 from .architectures import *  # noqa: F401,F403
 from .builder import (ALGORITHMS, ARCHITECTURES, DISTILLERS, LOSSES, MUTABLES,

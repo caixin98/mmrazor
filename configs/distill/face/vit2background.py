@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_sgd.py',
+    '../../_base_/datasets/face/celeb_propagate_bg.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
@@ -12,7 +12,7 @@ optical = dict(
     target_dim=[164, 128],
     requires_grad=True,
     down="resize",
-    noise_type="gaussian",
+    noise_type=None,
     angle = 30,
     # do_affine=True,
     n_psf_mask=1)
@@ -36,7 +36,7 @@ student = dict(
     type = 'mmcls.AffineFaceImageClassifier',
     backbone=dict(
         type='T2T_ViT_optical',
-        optical=optical,
+        optical=no_optical,
         image_size=168),
     neck=dict(
         type='GlobalDepthWiseNeck',
@@ -52,7 +52,8 @@ teacher = dict(
         type='T2T_ViT_optical',
         optical=no_optical,
         apply_affine=True,
-        image_size=168),
+        image_size=168,
+        remove_bg=True),
     neck=dict(
         type='GlobalDepthWiseNeck',
         in_channels=384,
