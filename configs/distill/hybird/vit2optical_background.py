@@ -1,6 +1,7 @@
-_base_ = [
-    '../../_base_/datasets/face/celeb_propagate_rotate.py',
-]
+from mmcv import Config
+_cls_base_ = Config.fromfile(
+    'configs/_base_/datasets/face/celeb_propagate_bg.py'
+)
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
     type='SoftPsfConv',
@@ -30,13 +31,32 @@ no_optical = dict(
     noise_type=None,
     n_psf_mask=1)
 
+data = dict(
+    workers_per_gpu=4,
+    train_dataloader=dict(
+        cls=dict(samples_per_gpu=_cls_base_.data.train_dataloader.samples_per_gpu),
+    ),
+    train=dict(
+        cls=_cls_base_.data.train,
+    ),
+    val_dataloader=dict(samples_per_gpu=2),
+    test_dataloader=dict(samples_per_gpu=2),
+    val=dict(
+        type='HybridDataset',
+        cls_dataset=_cls_base_.data.val,
+        test_mode=True
+    ),
+    test=dict(
+        type='HybridDataset',
+        cls_dataset=_cls_base_.data.test,
+        test_mode=True
+    ),
+)
 
-student = dict(
+cls_student = dict(
     type = 'mmcls.AffineFaceImageClassifier',
     backbone=dict(
-        type='T2T_ViT_optical',
-        optical=optical,
-        image_size=168),
+        type='T2T_ViT'),
     neck=dict(
         type='GlobalDepthWiseNeck',
         in_channels=384,
@@ -45,13 +65,11 @@ student = dict(
     head=dict(
         type='IdentityClsHead',
         loss=dict(type='ArcMargin', out_features=93955)))
-teacher = dict(
+
+cls_teacher = dict(
     type = 'mmcls.AffineFaceImageClassifier',
     backbone=dict(
-        type='T2T_ViT_optical',
-        optical=no_optical,
-        apply_affine=True,
-        image_size=168),
+        type='T2T_ViT'),
     neck=dict(
         type='GlobalDepthWiseNeck',
         in_channels=384,
@@ -60,13 +78,28 @@ teacher = dict(
     head=dict(
         type='IdentityClsHead',
         loss=dict(type='ArcMargin', out_features=93955)),
-        init_cfg=dict(type='Pretrained', checkpoint=teacher_ckpt),
+    init_cfg=dict(type='Pretrained', checkpoint=teacher_ckpt),
+)
+
+student = dict(
+    type='BaseHybrid',
+    img_size=168,
+    optical=optical,
+    classifier=cls_student,
+)
+
+teacher = dict(
+    type='BaseHybrid',
+    img_size=168,
+    optical=no_optical,
+    classifier=cls_teacher,
+    remove_bg=True,
 )
 
 algorithm = dict(
     type='GeneralDistill',
     architecture=dict(
-        type='MMClsArchitecture',
+        type='HybridArchitecture',
         model=student,
     ),
     with_student_loss=True,
@@ -78,8 +111,8 @@ algorithm = dict(
         teacher_norm_eval=True,
         components=[
             dict(
-                student_module='neck.fc',
-                teacher_module='neck.fc',
+                student_module='classifier.neck.fc',
+                teacher_module='classifier.neck.fc',
                   losses=[
                     dict(
                         type='DistanceWiseRKD',
@@ -94,4 +127,26 @@ algorithm = dict(
                 ])
         ]),
 )
+# optimizer
+log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+find_unused_parameters = True
+
+
+optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
+lr_config = dict(
+    policy='CosineAnnealing',
+    min_lr=0,
+    warmup='linear',
+    warmup_iters=20000,
+    warmup_ratio=0.25)
+checkpoint_config = dict(by_epoch=False, interval=20000)
+runner = dict(type='HybridIterBasedRunner', max_iters=200000)
+evaluation = dict(interval=2000, cls_args=_cls_base_.evaluation)
+optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 # custom_hooks = dict(_delete_=True)
+del Config, _cls_base_

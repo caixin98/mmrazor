@@ -51,6 +51,33 @@ class GeneralDistill(BaseAlgorithm):
         losses.update(distill_losses)
 
         loss, log_vars = self._parse_losses(losses)
+        if 'img_metas' not in data.keys():
+            input_dict = data['input_dict']
+            num_samples = len(input_dict[list(input_dict.keys())[0]]['img_metas'])
+        else:
+            num_samples = len(data['img_metas'])
         outputs = dict(
-            loss=loss, log_vars=log_vars, num_samples=len(data['img'].data))
+                loss=loss, log_vars=log_vars,
+                num_samples=num_samples)
+        return outputs
+
+    def val_step(self, data, optimizer=None):
+        """The iteration step during validation.
+
+        This method shares the same signature as :func:`train_step`, but used
+        during val epochs. Note that the evaluation after training epochs is
+        not implemented with this method, but an evaluation hook.
+        """
+        losses = self(**data)
+        loss, log_vars = self._parse_losses(losses)
+
+        if 'img_metas' not in data.keys():
+            input_dict = data['input_dict']
+            num_samples = len(input_dict[list(input_dict.keys())[0]]['img_metas'])
+        else:
+            num_samples = len(data['img_metas'])
+        outputs = dict(
+                loss=loss, log_vars=log_vars,
+                num_samples=num_samples)
+        
         return outputs

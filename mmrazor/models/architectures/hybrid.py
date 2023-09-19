@@ -1,9 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmrazor.models.builder import MODELS
-from mmcv.utils import Registry
 from mmcv.runner import BaseModule
+from mmrazor.models.builder import ARCHITECTURES
 
-class BaseArchitecture(BaseModule):
+@ARCHITECTURES.register_module()
+class HybridArchitecture(BaseModule):
     """Base class for architecture.
 
     Args:
@@ -12,15 +13,15 @@ class BaseArchitecture(BaseModule):
     """
 
     def __init__(self, model, **kwargs):
-        super(BaseArchitecture, self).__init__(**kwargs)
+        super(HybridArchitecture, self).__init__(**kwargs)
         self.model = MODELS.build(model)
 
-    def forward_dummy(self, img):
-        """Used for calculating network flops."""
-        assert hasattr(self.model, 'forward_dummy')
-        return self.model.forward_dummy(img)
+    # def forward_dummy(self, img):
+    #     """Used for calculating network flops."""
+    #     assert hasattr(self.model, 'forward_dummy')
+    #     return self.model.forward_dummy(img)
 
-    def forward(self, img, return_loss=True, **kwargs):
+    def forward(self, input_dict, return_loss=True):
         """Calls either forward_train or forward_test depending on whether
         return_loss=True.
 
@@ -30,12 +31,12 @@ class BaseArchitecture(BaseModule):
         should be double nested (i.e.  List[Tensor], List[List[dict]]), with
         the outer list indicating test time augmentations.
         """
-        return self.model(img, return_loss=return_loss, **kwargs)
+        return self.model(input_dict, return_loss=return_loss)
 
-    def simple_test(self, img, img_metas):
-        """Test without augmentation."""
-        return self.model.simple_test(img, img_metas)
+    # def simple_test(self, img, img_metas):
+    #     """Test without augmentation."""
+    #     return self.model.simple_test(img, img_metas)
 
-    def show_result(self, img, result, **kwargs):
-        """Draw `result` over `img`"""
-        return self.model.show_result(img, result, **kwargs)
+    # def show_result(self, img, result, **kwargs):
+    #     """Draw `result` over `img`"""
+    #     return self.model.show_result(img, result, **kwargs)

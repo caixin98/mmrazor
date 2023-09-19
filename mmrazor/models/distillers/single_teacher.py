@@ -168,7 +168,6 @@ class SingleTeacherDistiller(BaseDistiller):
         self.reset_ctx_teacher_mode(True)
         # Clear the saved data of the last forward。
         self.reset_outputs(self.teacher_outputs)
-
         if self.teacher_trainable:
             output = self.teacher(**data)
         else:
@@ -187,7 +186,6 @@ class SingleTeacherDistiller(BaseDistiller):
         self.reset_ctx_teacher_mode(False)
         # Clear the saved data of the last forward。
         self.reset_outputs(self.student_outputs)
-
         output = student(**data)
         return output
 

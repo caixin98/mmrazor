@@ -104,7 +104,7 @@ data = dict(
             dict(type="TorchAffineRTS",angle=(0,30),
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
-                prob=0.0),
+                prob=1.0),
             dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
