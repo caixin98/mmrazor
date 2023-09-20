@@ -2,7 +2,8 @@ _base_ = [
     '../../_base_/datasets/face/retinaface.py'
 ]
 
-teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_optical_face/vit_retina_test_wflw5/latest.pth"
+teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
+# student_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
 optical = dict(
     type='SoftPsfConv',
     feature_size=2.76e-05,
@@ -73,6 +74,7 @@ student = dict(
         in_channels=384,
         num_joints=channel_cfg['num_output_channels'],
         loss_keypoint=dict(type='SmoothL1Loss', use_target_weight=True)),
+    load_weights_path=teacher_ckpt,
     train_cfg=dict(),
     test_cfg=dict(flip_test=True))
 teacher = dict(
@@ -90,6 +92,7 @@ teacher = dict(
         in_channels=384,
         num_joints=channel_cfg['num_output_channels'],
         loss_keypoint=dict(type='SmoothL1Loss', use_target_weight=True)),
+    load_weights_path=teacher_ckpt,
     train_cfg=dict(),
     test_cfg=dict(flip_test=True))
 
@@ -114,12 +117,12 @@ algorithm = dict(
                     dict(
                         type='DistanceWiseRKD',
                         name='distance_wise_loss',
-                        loss_weight=0.001,
+                        loss_weight=0.04,
                         with_l2_norm=True),
                     dict(
                         type='AngleWiseRKD',
                         name='angle_wise_loss',
-                        loss_weight=0.001,
+                        loss_weight=0.04,
                         with_l2_norm=True),
                 ])
         ]),
@@ -137,12 +140,12 @@ data_cfg = dict(
 
 train_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='TopDownGetBboxCenterScale', padding=1.25),
-    dict(type='TopDownRandomShiftBboxCenter', shift_factor=0.16, prob=0.3),
+    dict(type='TopDownGetBboxCenterScale', padding=2),
+    dict(type='TopDownRandomShiftBboxCenter', shift_factor=0.16, prob=1),
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
         type='TopDownGetRandomScaleRotation', rot_factor=30,
-        scale_factor=0.25),
+        scale_factor=0.4),
     dict(type='TopDownAffine'),
     dict(
         type='Propagated',
@@ -223,6 +226,10 @@ data = dict(
         dataset_info={{_base_.dataset_info}}),
 )
 checkpoint_config = dict(interval=10)
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
+]
 # custom_hooks = [
 #     dict(type='VisualConvHook'),
 #     dict(type='VisualAfterOpticalHook')

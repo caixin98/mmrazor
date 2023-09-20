@@ -1,7 +1,10 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 from mmcv.cnn import MODELS as MMCV_MODELS
 from mmcv.utils import Registry
-
+from mmcls.models import build_classifier
+from mmdet.models import build_detector
+from mmpose.models import build_posenet
+from mmcls.models import build_optical
 MODELS = Registry('models', parent=MMCV_MODELS)
 
 ALGORITHMS = MODELS
@@ -13,6 +16,13 @@ PRUNERS = MODELS
 QUANTIZERS = MODELS
 ARCHITECTURES = MODELS
 MUTATORS = MODELS
+HYBRIDS = MODELS
+SIMULATOR = MODELS
+
+
+def build_simulator(cfg):
+    """Build posenet."""
+    return SIMULATOR.build(cfg)
 
 
 def build_algorithm(cfg):
@@ -53,3 +63,7 @@ def build_op(cfg):
 def build_loss(cfg):
     """Build loss."""
     return LOSSES.build(cfg)
+
+def build_hybrid(cfg):
+    """Build posenet."""
+    return HYBRIDS.build(cfg)

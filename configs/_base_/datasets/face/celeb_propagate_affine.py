@@ -116,8 +116,8 @@ data = dict(
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [
-    dict(type='VisualConvHook',do_distall=True),
-    dict(type='VisualAfterOpticalHook', do_distall=True),
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
 ]
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(

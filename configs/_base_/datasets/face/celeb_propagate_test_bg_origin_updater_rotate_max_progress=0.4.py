@@ -26,7 +26,7 @@ data = dict(
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='Resize', size=(172, 172)),
-            dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
+            # dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
             dict(type='CenterCrop', crop_size=(112, 96)),
             dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
             dict(
@@ -42,10 +42,10 @@ data = dict(
             dict(type="TorchAffineRTS", angle=(0,30),
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
-                prob=0.0),
+                prob=1.0),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
             dict(type='ToTensor', keys=['gt_label']),
-            # dict(type='StackImagePair', keys=['img', 'img_wobg'], out_key='img'),
+            dict(type='StackImagePair', keys=['img', 'img_wobg'], out_key='img'),
             dict(type='Collect', keys=['img', 'gt_label', 'affine_matrix'])
         ]),
     val=dict(
@@ -69,12 +69,12 @@ data = dict(
                 grayscale=False,
                 input_dim=[112, 96, 3],
                 output_dim=[308, 257, 3]),
-             dict(type="TorchAffineRTS",angle=(0,30),
+            dict(type="TorchAffineRTS",angle=(0,30),
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
-                prob=0.0),
-            dict(type='ToTensor', keys=['fold', 'label']),
+                prob=1.0),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100)),
+            dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
                 keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
@@ -107,21 +107,23 @@ data = dict(
             dict(type="TorchAffineRTS",angle=(0,30),
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
-                prob=0.0),
-            dict(type='ToTensor', keys=['fold', 'label']),
+                prob=1.0),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100)),
+            dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
                 keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
                 out_key='img'),
             dict(type='Collect', keys=['img', 'fold', 'label', 'affine_matrix'])
         ]),
-    train_dataloader=dict(samples_per_gpu=140),
+    train_dataloader=dict(samples_per_gpu=140, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
+    dict(type='BGUpdaterHook', max_progress=0.4),
+    dict(type='CropUpdaterHook', max_progress=0.4),
 ]
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(
@@ -136,7 +138,7 @@ lr_config = dict(
     warmup_ratio=1e-6)
 checkpoint_config = dict(interval=10)
 runner = dict(type='EpochBasedRunner', max_epochs=100)
-evaluation = dict(metric='accuracy')
+evaluation = dict(interval=1, metric='accuracy')
 # runner = dict(type='IterBasedRunner', max_iters=200000)
 # checkpoint_config = dict(interval=1000)
 # evaluation = dict(interval=500,metric='accuracy')

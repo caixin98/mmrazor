@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_rotate.py',
+    '../../_base_/datasets/face/celeb_propagate_test_bg.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
@@ -51,7 +51,8 @@ teacher = dict(
         type='T2T_ViT_optical',
         optical=no_optical,
         apply_affine=True,
-        image_size=168),
+        image_size=168,
+        remove_bg=True),
     neck=dict(
         type='GlobalDepthWiseNeck',
         in_channels=384,

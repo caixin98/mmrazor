@@ -104,20 +104,21 @@ data = dict(
             dict(type="TorchAffineRTS",angle=(0,30),
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
-                prob=1.0),
+                prob=0.0),
             dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
                 keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
                 out_key='img'),
-            dict(type='Collect', keys=['img', 'fold', 'label'])
+            dict(type='Collect', keys=['img', 'fold', 'label', 'affine_matrix'])
+
         ]),
     train_dataloader=dict(samples_per_gpu=140),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [
-    dict(type='VisualConvHook',do_distall=True),
-    dict(type='VisualAfterOpticalHook', do_distall=True),
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
 ]
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(

@@ -149,7 +149,7 @@ class BaseAlgorithm(BaseModule):
         """Whether or not this property exists."""
         return hasattr(self, 'distiller') and self.distiller is not None
 
-    def forward(self, img, return_loss=True, **kwargs):
+    def forward(self, return_loss=True, **kwargs):
         """Calls either forward_train or forward_test depending on whether
         return_loss=True.
 
@@ -159,7 +159,8 @@ class BaseAlgorithm(BaseModule):
         should be double nested (i.e.  List[Tensor], List[List[dict]]), with
         the outer list indicating test time augmentations.
         """
-        return self.architecture(img, return_loss=return_loss, **kwargs)
+     
+        return self.architecture(return_loss=return_loss, **kwargs)
 
     def simple_test(self, img, img_metas):
         """Test without augmentation."""

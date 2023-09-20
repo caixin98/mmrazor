@@ -2,7 +2,6 @@
 from ..builder import ARCHITECTURES
 from .base import BaseArchitecture
 
-
 @ARCHITECTURES.register_module()
 class MMClsArchitecture(BaseArchitecture):
     """Architecture based on MMCls."""
