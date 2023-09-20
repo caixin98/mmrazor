@@ -208,5 +208,10 @@ runner = dict(type='HybridIterBasedRunner', max_iters=200000)
 evaluation = dict(interval=2000, cls_args=_cls_base_.evaluation,
 pose_args=_pose_base_.evaluation)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
+    dict(type='BGUpdaterHook', max_progress = 0.2)
+]
 # custom_hooks = dict(_delete_=True)
 del Config, _cls_base_, _pose_base_

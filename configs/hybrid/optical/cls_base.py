@@ -25,7 +25,7 @@ data = dict(
 
 model = dict(
     type='BaseHybrid',
-    image_size=168,
+    img_size=168,
     optical=_cls_base_.optical,
     classifier=_cls_base_.model,
 )
@@ -40,7 +40,7 @@ workflow = [('train', 1)]
 find_unused_parameters = True
 
 
-optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
+optimizer = dict(type='SGD', lr=0.1, momentum=0.9, weight_decay=0.0001)
 lr_config = dict(
     policy='CosineAnnealing',
     min_lr=0,
@@ -52,4 +52,8 @@ runner = dict(type='HybridIterBasedRunner', max_iters=200000)
 evaluation = dict(interval=2000, cls_args=_cls_base_.evaluation)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
+]
 del Config, _cls_base_

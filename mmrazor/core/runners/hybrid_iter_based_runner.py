@@ -2,8 +2,8 @@
 import time
 import warnings
 import mmcv
-from mmcv.runner import RUNNERS, IterBasedRunner, get_host_info, IterLoader, EpochBasedRunner
-
+from mmcv.runner import RUNNERS, IterBasedRunner, get_host_info, IterLoader
+import random
 class HybridIterLoader:
 
     def __init__(self, dataloader_dict, main_key=None):
@@ -21,6 +21,7 @@ class HybridIterLoader:
         data = {}
         for key, iter_loader in self._iter_loaders.items():
             data[key] = iter_loader.__next__()
+            assert(data[key]["img"].min() >= 0)
         return dict(input_dict=data)
 
     def __len__(self):
@@ -66,7 +67,7 @@ class HybridIterBasedRunner(IterBasedRunner):
         self.logger.info('workflow: %s, max: %d iters', workflow,
                          self._max_iters)
         self.call_hook('before_run')
-
+        # random shuffle the dataloader
         iter_loaders = [HybridIterLoader(x) if isinstance(x, dict) else IterLoader(x) for x in data_loaders]
 
         self.call_hook('before_epoch')

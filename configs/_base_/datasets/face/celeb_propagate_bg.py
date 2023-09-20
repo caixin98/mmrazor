@@ -43,9 +43,9 @@ data = dict(
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
                 prob=0.0),
-            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
+            # dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
             dict(type='ToTensor', keys=['gt_label']),
-            dict(type='StackImagePair', keys=['img', 'img_wobg'], out_key='img'),
+            # dict(type='StackImagePair', keys=['img', 'img_wobg'], out_key='img'),
             dict(type='Collect', keys=['img', 'gt_label', 'affine_matrix'])
         ]),
     val=dict(
@@ -120,8 +120,8 @@ data = dict(
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [
-    dict(type='VisualConvHook',do_distall=True),
-    dict(type='VisualAfterOpticalHook', do_distall=True),
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
 ]
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(

@@ -224,8 +224,8 @@ data = dict(
 )
 checkpoint_config = dict(interval=10)
 # custom_hooks = [
-#     dict(type='VisualConvHook', do_distill=True),
-#     dict(type='VisualAfterOpticalHook', do_distill=True)
+#     dict(type='VisualConvHook'),
+#     dict(type='VisualAfterOpticalHook')
 # ]
 # evaluation = dict(interval=1, metric='accuracy')
 # custom_hooks = [

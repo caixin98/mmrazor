@@ -2,8 +2,8 @@
 from mmrazor.models.builder import ALGORITHMS
 from mmrazor.models.utils import add_prefix
 from .base import BaseAlgorithm
-
-
+import copy
+from watchpoints import watch
 @ALGORITHMS.register_module()
 class GeneralDistill(BaseAlgorithm):
     """General Distillation Algorithm.
@@ -26,16 +26,18 @@ class GeneralDistill(BaseAlgorithm):
 
     def train_step(self, data, optimizer):
         """"""
+        # student_data = copy.deepcopy(data)
         losses = dict()
         if self.with_teacher_loss:
             teacher_losses = self.distiller.exec_teacher_forward(data)
             teacher_losses = add_prefix(teacher_losses, 'teacher')
             losses.update(teacher_losses)
+          
         else:
             # Just to be able to trigger the forward hooks that
             # have been registered
             _ = self.distiller.exec_teacher_forward(data)
-
+        input_dict = data['input_dict']
         if self.with_student_loss:
             student_losses = self.distiller.exec_student_forward(
                 self.architecture, data)
@@ -45,6 +47,7 @@ class GeneralDistill(BaseAlgorithm):
             # Just to be able to trigger the forward hooks that
             # have been registered
             _ = self.distiller.exec_student_forward(self.architecture, data)
+       
 
         distill_losses = self.distiller.compute_distill_loss(data)
         distill_losses = add_prefix(distill_losses, 'distiller')
@@ -54,6 +57,7 @@ class GeneralDistill(BaseAlgorithm):
         if 'img_metas' not in data.keys():
             input_dict = data['input_dict']
             num_samples = len(input_dict[list(input_dict.keys())[0]]['img_metas'])
+          
         else:
             num_samples = len(data['img_metas'])
         outputs = dict(

@@ -120,8 +120,8 @@ data = dict(
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [
-    dict(type='VisualConvHook',do_distill=True),
-    dict(type='VisualAfterOpticalHook', do_distill=True),
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
     dict(type='BGUpdaterHook', max_progress=0.4),
     dict(type='CropUpdaterHook', max_progress=0.4),
 ]

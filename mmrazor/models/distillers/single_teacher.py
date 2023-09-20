@@ -168,12 +168,14 @@ class SingleTeacherDistiller(BaseDistiller):
         self.reset_ctx_teacher_mode(True)
         # Clear the saved data of the last forward。
         self.reset_outputs(self.teacher_outputs)
+        input_dict = data['input_dict']
+        assert(input_dict[list(input_dict.keys())[0]]['img'].min() >= 0)
         if self.teacher_trainable:
             output = self.teacher(**data)
         else:
             with torch.no_grad():
                 output = self.teacher(**data)
-
+       
         return output
 
     def exec_student_forward(self, student, data):

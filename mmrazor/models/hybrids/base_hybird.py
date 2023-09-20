@@ -7,7 +7,7 @@ import torch
 import torch.distributed as dist
 # from mmdet.core import encode_mask_results
 import torch.nn.functional as F
-
+import random
 @HYBRIDS.register_module()
 class BaseHybrid(BaseModule):
     def __init__(self,
@@ -30,13 +30,13 @@ class BaseHybrid(BaseModule):
         else:
             self.optical = None
         if classifier is not None:
-            classifier['img_size'] = img_size
+            classifier['backbone']['img_size'] = img_size
             self.classifier = build_classifier(classifier)
         if detector is not None:
-            detector['img_size'] = img_size
+            detector['backbone']['img_size'] = img_size
             self.detector = build_detector(detector)
         if posenet is not None:
-            posenet['img_size'] = img_size
+            posenet['backbone']['img_size'] = img_size
             self.posenet = build_posenet(posenet)
         self.remove_bg = remove_bg
 
@@ -57,26 +57,51 @@ class BaseHybrid(BaseModule):
         """Forward computation during training.
         """
         losses_all = {}
-        if hasattr(self, 'classifier'):
-            data = input_dict['cls']
-            data["img"] = self.forward_optical(data["img"])
-            losses = self.classifier(**data, return_loss=True)
+        #for visualization both cls and pose
+        if random.random() < 0.5:
+            if hasattr(self, 'classifier'):
+                data = input_dict['cls']
+                data["img"] = self.forward_optical(data["img"])
+                losses = self.classifier(**data, return_loss=True)
 
-            for key in losses.keys():
-                losses_all['cls_'+key] = losses[key]
-        if hasattr(self, 'detector'):
-            data = input_dict['det']
-            data["img"] = self.forward_optical(data["img"])
-            losses = self.detector(**data, return_loss=True)
-            for key in losses.keys():
-                losses_all['det_'+key] = losses[key]
+                for key in losses.keys():
+                    losses_all['cls_'+key] = losses[key]
 
-        if hasattr(self, 'posenet'):
-            data = input_dict['pose']
-            data["img"] = self.forward_optical(data["img"])
-            losses = self.posenet(**data, return_loss=True)
-            for key in losses.keys():
-                losses_all['pose_'+key] = losses[key]
+            if hasattr(self, 'detector'):
+                data = input_dict['det']
+                data["img"] = self.forward_optical(data["img"])
+                losses = self.detector(**data, return_loss=True)
+                for key in losses.keys():
+                    losses_all['det_'+key] = losses[key]
+
+            if hasattr(self, 'posenet'):
+                data = input_dict['pose']
+                data["img"] = self.forward_optical(data["img"])
+                losses = self.posenet(**data, return_loss=True)
+                for key in losses.keys():
+                    losses_all['pose_'+key] = losses[key]
+        else:
+            if hasattr(self, 'posenet'):
+                data = input_dict['pose']
+                data["img"] = self.forward_optical(data["img"])
+                losses = self.posenet(**data, return_loss=True)
+                for key in losses.keys():
+                    losses_all['pose_'+key] = losses[key]
+
+            if hasattr(self, 'classifier'):
+                data = input_dict['cls']
+                data["img"] = self.forward_optical(data["img"])
+                losses = self.classifier(**data, return_loss=True)
+
+                for key in losses.keys():
+                    losses_all['cls_'+key] = losses[key]
+
+            if hasattr(self, 'detector'):
+                data = input_dict['det']
+                data["img"] = self.forward_optical(data["img"])
+                losses = self.detector(**data, return_loss=True)
+                for key in losses.keys():
+                    losses_all['det_'+key] = losses[key]
        # print(losses)
         
         # losses_kernel_tv = self.tvloss(kernel)
