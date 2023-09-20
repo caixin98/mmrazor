@@ -1,5 +1,5 @@
 from mmcv import Config
-_cls_base_ = Config.fromfile('configs/hybrid/recog/full_gaussian.py')
+_cls_base_ = Config.fromfile('configs/_base_/datasets/face/celeb_propagate_bg.py')
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
     type='SoftPsfConv',
@@ -32,7 +32,7 @@ no_optical = dict(
 data = dict(
     workers_per_gpu=4,
     train_dataloader=dict(
-        cls=dict(samples_per_gpu=_cls_base_.data.train_dataloader.samples_per_gpu),
+        cls=dict(samples_per_gpu=140),
     ),
     train=dict(
         cls=_cls_base_.data.train,
@@ -115,12 +115,12 @@ algorithm = dict(
                     dict(
                         type='DistanceWiseRKD',
                         name='distance_wise_loss',
-                        loss_weight=00.0,
+                        loss_weight=100.0,
                         with_l2_norm=True),
                     dict(
                         type='AngleWiseRKD',
                         name='angle_wise_loss',
-                        loss_weight=00.0,
+                        loss_weight=200.0,
                         with_l2_norm=True),
                 ])
         ]),
@@ -149,7 +149,7 @@ optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
-    # dict(type='BGUpdaterHook', max_progress = 0.2)
+    dict(type='BGUpdaterHook', max_progress = 0.2)
 ]
 # custom_hooks = dict(_delete_=True)
 del Config, _cls_base_

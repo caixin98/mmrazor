@@ -104,7 +104,7 @@ data = dict(
                 out_key='img'),
             dict(type='Collect', keys=['img', 'fold', 'label'])
         ]),
-    train_dataloader=dict(samples_per_gpu=200),
+    train_dataloader=dict(samples_per_gpu=100),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 

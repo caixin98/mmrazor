@@ -3,7 +3,6 @@ from mmrazor.models.builder import ALGORITHMS
 from mmrazor.models.utils import add_prefix
 from .base import BaseAlgorithm
 import copy
-from watchpoints import watch
 @ALGORITHMS.register_module()
 class GeneralDistill(BaseAlgorithm):
     """General Distillation Algorithm.
