@@ -43,7 +43,7 @@ data = dict(
                 # translate = (0.2,0.2),
                 # scale_factor=0.2,
                 prob=0.0),
-            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
+            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (50, 50)),
             dict(type='ToTensor', keys=['gt_label']),
             # dict(type='StackImagePair', keys=['img', 'img_wobg'], out_key='img'),
             dict(type='Collect', keys=['img', 'gt_label', 'affine_matrix'])

@@ -173,7 +173,7 @@ def main():
     meta['seed'] = seed
 
     model = build_algorithm(cfg.algorithm)
-    model.init_weights()
+    # model.init_weights()
 
     datasets = [build_hybrid_dataset_train(cfg.data.train)]
     if len(cfg.workflow) == 2:

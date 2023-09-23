@@ -18,6 +18,7 @@ dataset_info = dict(
     joint_weights=[1.] * 5,
     sigmas=[])  
 
+pose_teacher_ckpt = "logs/hybrid/no_optical/pose_base/iter_18000.pth"
 evaluation = dict(metric=['NME'], save_best='NME')
 
 channel_cfg = dict(
@@ -39,6 +40,7 @@ model = dict(
         in_channels=384,
         num_joints=channel_cfg['num_output_channels'],
         loss_keypoint=dict(type='SmoothL1Loss', use_target_weight=True)),
+    # load_weights_path=pose_teacher_ckpt,
     train_cfg=dict(),
     test_cfg=dict(flip_test=True))
 

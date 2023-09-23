@@ -21,7 +21,6 @@ class HybridIterLoader:
         data = {}
         for key, iter_loader in self._iter_loaders.items():
             data[key] = iter_loader.__next__()
-            assert(data[key]["img"].min() >= 0)
         return dict(input_dict=data)
 
     def __len__(self):

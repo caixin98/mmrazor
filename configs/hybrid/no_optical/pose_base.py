@@ -5,7 +5,7 @@ _pose_base_ = Config.fromfile('configs/hybrid/pose/retina_wflw5.py')
 data = dict(
     workers_per_gpu=4,
     train_dataloader=dict(
-        pose=dict(samples_per_gpu=_pose_base_.data.train_dataloader.samples_per_gpu),
+        pose=dict(samples_per_gpu=128),
     ),
     train=dict(
         pose=_pose_base_.data.train,
@@ -24,15 +24,30 @@ data = dict(
     ),
 )
 
+no_optical = dict(
+    type='SoftPsfConv',
+    feature_size=2.76e-05,
+    sensor='IMX250',
+    input_shape=[3, 308, 257],
+    scene2mask=0.4,
+    mask2sensor=0.002,
+    target_dim=[164, 128],
+    do_optical=False,
+    requires_grad=True,
+    use_stn=False,
+    down="resize",
+    noise_type=None,
+    n_psf_mask=1)
+
 model = dict(
     type='BaseHybrid',
-    image_size=168,
-    optical=_cls_base_.optical,
+    img_size=168,
+    optical=no_optical,
     posenet=_pose_base_.model,
 )
 
 # optimizer
-log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
+log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 load_from = None
@@ -48,9 +63,9 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=2000,
     warmup_ratio=0.25)
-checkpoint_config = dict(by_epoch=False, interval=20000)
+checkpoint_config = dict(by_epoch=False, interval=2000)
 runner = dict(type='HybridIterBasedRunner', max_iters=200000)
-evaluation = dict(interval=200)
+evaluation = dict(interval=2)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
-
+# resume_from = "logs/hybrid/no_optical/pose_base/iter_18000.pth"
 del Config, _cls_base_, _pose_base_

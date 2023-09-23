@@ -36,7 +36,6 @@ class GeneralDistill(BaseAlgorithm):
             # Just to be able to trigger the forward hooks that
             # have been registered
             _ = self.distiller.exec_teacher_forward(data)
-        input_dict = data['input_dict']
         if self.with_student_loss:
             student_losses = self.distiller.exec_student_forward(
                 self.architecture, data)
