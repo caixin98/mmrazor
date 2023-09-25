@@ -15,8 +15,6 @@ optical = dict(
     requires_grad=True,
     down="resize",
     noise_type="gaussian",
-    load_weights_path="logs/distill/hybird/cls_base/iter_60000.pth",
-    requires_grad_psf=False,
     n_psf_mask=1)
 
 no_optical = dict(
@@ -35,16 +33,11 @@ no_optical = dict(
 
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(
-    policy='CosineAnnealingCooldown',
-    min_lr=1e-5,
-    cool_down_time=10,
-    cool_down_ratio=0.1,
-    by_epoch=True,
-    warmup_by_epoch=True,
+    policy='CosineAnnealing',
+    min_lr=0,
     warmup='linear',
-    warmup_iters=10,
-    warmup_ratio=1e-6)
-total_epochs = 3000
+    warmup_iters=1000,
+    warmup_ratio=0.25)
 log_config = dict(
     interval=5,
     hooks=[
@@ -146,8 +139,8 @@ train_pipeline = [
     dict(type='TopDownRandomShiftBboxCenter', shift_factor=0.16, prob=1),
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
-        type='TopDownGetRandomScaleRotation', rot_factor=15,
-        scale_factor=0.2),
+        type='TopDownGetRandomScaleRotation', rot_factor=30,
+        scale_factor=0.4),
     dict(type='TopDownAffine'),
     dict(
         type='Propagated',
@@ -227,7 +220,9 @@ data = dict(
         pipeline=test_pipeline,
         dataset_info={{_base_.dataset_info}}),
 )
-checkpoint_config = dict(interval=10)
+checkpoint_config = dict(by_epoch=False, interval=2000)
+runner = dict(type='IterBasedRunner', max_iters=200000)
+evaluation = dict(interval=20,)
 custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
@@ -243,5 +238,5 @@ custom_hooks = [
 # ]
 # runner = dict(type='IterBasedRunner', max_iters=200000)
 # checkpoint_config = dict(interval=1000)
-evaluation = dict(interval=10)
+# evaluation = dict(interval=500,metric='accuracy')
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))

@@ -144,8 +144,8 @@ train_pipeline = [
     dict(type='TopDownRandomShiftBboxCenter', shift_factor=0.16, prob=1),
     dict(type='TopDownRandomFlip', flip_prob=0.5),
     dict(
-        type='TopDownGetRandomScaleRotation', rot_factor=30,
-        scale_factor=0.4),
+        type='TopDownGetRandomScaleRotation', rot_factor=15,
+        scale_factor=0.2),
     dict(type='TopDownAffine'),
     dict(
         type='Propagated',

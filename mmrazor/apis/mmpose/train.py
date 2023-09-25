@@ -6,7 +6,7 @@ import numpy as np
 import torch
 import torch.distributed as dist
 from mmcv.parallel import MMDataParallel, MMDistributedDataParallel
-from mmcv.runner import (DistSamplerSeedHook, EpochBasedRunner, OptimizerHook,
+from mmcv.runner import (DistSamplerSeedHook, build_runner, OptimizerHook,
                          get_dist_info)
 from mmcv.utils import digit_version
 
@@ -79,7 +79,6 @@ def train_model(model,
             Default: None
     """
     logger = get_root_logger(cfg.log_level)
-
     # prepare data loaders
     dataset = dataset if isinstance(dataset, (list, tuple)) else [dataset]
     # step 1: give default values and override (if exist) from cfg.data
@@ -147,13 +146,36 @@ def train_model(model,
 
     # build runner
     optimizer = build_optimizers(model, cfg.optimizer)
+    if cfg.get('runner') is None:
+        cfg.runner = {
+            'type': 'EpochBasedRunner',
+            'max_epochs': cfg.total_epochs
+        }
+        warnings.warn(
+            'config is now expected to have a ``runner`` section, '
+            'please set ``runner`` in your config.', UserWarning)
 
-    runner = EpochBasedRunner(
-        model,
-        optimizer=optimizer,
-        work_dir=cfg.work_dir,
-        logger=logger,
-        meta=meta)
+    if 'runner' not in cfg:
+        cfg.runner = {
+            'type': 'EpochBasedRunner',
+            'max_epochs': cfg.total_epochs
+        }
+        warnings.warn(
+            'config is now expected to have a ``runner`` section, '
+            'please set ``runner`` in your config.', UserWarning)
+    else:
+        if 'total_epochs' in cfg:
+            assert cfg.total_epochs == cfg.runner.max_epochs
+
+    runner = build_runner(
+        cfg.runner,
+        default_args=dict(
+            model=model,
+            optimizer=optimizer,
+            work_dir=cfg.work_dir,
+            logger=logger,
+            meta=meta))
+    
     # an ugly workaround to make .log and .log.json filenames the same
     runner.timestamp = timestamp
 
@@ -188,8 +210,7 @@ def train_model(model,
         cfg.log_config,
         cfg.get('momentum_config', None),
         custom_hooks_config=custom_hooks_cfg)
-
-    if distributed:
+    if distributed and cfg.runner['type'] == 'EpochBasedRunner':
         runner.register_hook(DistSamplerSeedHook())
 
     # register eval hooks
@@ -214,4 +235,4 @@ def train_model(model,
         runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
-    runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
+    runner.run(data_loaders, cfg.workflow)
