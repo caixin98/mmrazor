@@ -1,8 +1,8 @@
 _base_ = [
-    '../../_base_/datasets/face/retinaface.py'
+    '../../_base_/datasets/face/face_center.py'
 ]
 
-teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
+teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw1_no_optical_warmup/epoch_850.pth"
 # student_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
 optical = dict(
     type='SoftPsfConv',
@@ -15,7 +15,7 @@ optical = dict(
     requires_grad=True,
     down="resize",
     noise_type="gaussian",
-    load_weights_path="logs/distill/hybird/cls_base/iter_60000.pth",
+    load_weight_path="logs/distill/face/vit2optical_bg_updater_rotate/epoch_90.pth",
     requires_grad_psf=False,
     n_psf_mask=1)
 
@@ -53,12 +53,12 @@ log_config = dict(
     ])
 
 channel_cfg = dict(
-    num_output_channels=5,
-    dataset_joints=5,
+    num_output_channels=1,
+    dataset_joints=1,
     dataset_channel=[
-        list(range(5)),
+        list(range(1)),
     ],
-    inference_channel=list(range(5)))
+    inference_channel=list(range(1)))
 
 # model setting
 student = dict(
@@ -76,7 +76,7 @@ student = dict(
         in_channels=384,
         num_joints=channel_cfg['num_output_channels'],
         loss_keypoint=dict(type='SmoothL1Loss', use_target_weight=True)),
-    load_weights_path=teacher_ckpt,
+    # load_weights_path=teacher_ckpt,
     train_cfg=dict(),
     test_cfg=dict(flip_test=True))
 teacher = dict(
@@ -140,6 +140,7 @@ data_cfg = dict(
     dataset_channel=channel_cfg['dataset_channel'],
     inference_channel=channel_cfg['inference_channel'])
 
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='TopDownGetBboxCenterScale', padding=2),
@@ -175,7 +176,11 @@ train_pipeline = [
 
 val_pipeline = [
     dict(type='LoadImageFromFile'),
-    dict(type='TopDownGetBboxCenterScale', padding=1.25),
+    dict(type='TopDownGetBboxCenterScale', padding=2),
+    dict(type='TopDownRandomShiftBboxCenter', shift_factor=0.16, prob=1),
+    dict(
+        type='TopDownGetRandomScaleRotation', rot_factor=15,
+        scale_factor=0.2),
     dict(type='TopDownAffine'),
     dict(
         type='Propagated',
@@ -187,18 +192,15 @@ val_pipeline = [
         grayscale=False,
         input_dim=[128, 128, 3],
         output_dim=[308, 257, 3]),
-    # dict(
-    #     type='NormalizeTensor',
-    #     mean=[0.485, 0.456, 0.406],
-    #     std=[0.229, 0.224, 0.225]),
+     dict(type='TopDownGenerateTargetRegression'),
     dict(
         type='Collect',
-        keys=['img'],
+        keys=['img', 'target', 'target_weight'],
         meta_keys=['image_file', 'center', 'scale', 'rotation', 'flip_pairs']),
 ]
 test_pipeline = val_pipeline
 
-data_root = '/mnt/workspace/RawSense/data/retina_single_face_coco'
+data_root = '/mnt/workspace/RawSense/data/retina_single_face_coco/annotations_single_point'
 image_root = '/mnt/workspace/RawSense/data/widerface/WIDER_train'
 data = dict(
     samples_per_gpu=128,
@@ -206,23 +208,23 @@ data = dict(
     val_dataloader=dict(samples_per_gpu=32),
     test_dataloader=dict(samples_per_gpu=32),
     train=dict(
-        type='FaceRetinaDataset',
+        type='FaceCenterDataset',
         ann_file=f'{data_root}/face_landmarks_retina_train.json',
         img_prefix=f'{image_root}/',
         data_cfg=data_cfg,
         pipeline=train_pipeline,
         dataset_info={{_base_.dataset_info}}),
     val=dict(
-        type='FaceRetinaDataset',
-        ann_file=f'/mnt/workspace/RawSense/data/wflw/annotations_five_point/face_landmarks_wflw_test.json',
-        img_prefix=f'/mnt/workspace/RawSense/data/wflw/images/',
+        type='FaceCenterDataset',
+        ann_file=f'{data_root}/face_landmarks_retina_val.json',
+        img_prefix=f'{image_root}/',
         data_cfg=data_cfg,
         pipeline=val_pipeline,
         dataset_info={{_base_.dataset_info}}),
     test=dict(
-        type='FaceRetinaDataset',
-        ann_file=f'/mnt/workspace/RawSense/data/wflw/annotations_five_point/face_landmarks_wflw_test.json',
-        img_prefix=f'/mnt/workspace/RawSense/data/wflw/images/',
+        type='FaceCenterDataset',
+        ann_file=f'{data_root}/face_landmarks_retina_val.json',
+        img_prefix=f'{image_root}/',
         data_cfg=data_cfg,
         pipeline=test_pipeline,
         dataset_info={{_base_.dataset_info}}),
