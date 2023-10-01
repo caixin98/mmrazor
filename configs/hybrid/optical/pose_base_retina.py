@@ -1,6 +1,6 @@
 from mmcv import Config
 _cls_base_ = Config.fromfile('configs/hybrid/recog/full_gaussian.py')
-_pose_base_ = Config.fromfile('configs/hybrid/pose/retina_wflw5.py')
+_pose_base_ = Config.fromfile('configs/hybrid/pose/retina.py')
 
 data = dict(
     workers_per_gpu=4,
@@ -50,7 +50,7 @@ lr_config = dict(
     warmup_ratio=0.25)
 checkpoint_config = dict(by_epoch=False, interval=20000)
 runner = dict(type='HybridIterBasedRunner', max_iters=200000)
-evaluation = dict(interval=20)
+evaluation = dict(interval=200)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
 
 del Config, _cls_base_, _pose_base_

@@ -2,9 +2,10 @@ from mmcv import Config
 _cls_base_ = Config.fromfile(
     'configs/_base_/datasets/face/celeb_propagate_bg.py'
 )
-_pose_base_ = Config.fromfile('configs/hybrid/pose/retina_wflw5.py')
+_pose_base_ = Config.fromfile('configs/distill/pose/vit_retina_no_optical_warmup.py')
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
-pose_teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
+pose_teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_no_optical_warmup/latest.pth"
+# pose_teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
 optical = dict(
     type='SoftPsfConv',
     feature_size=2.76e-05,
@@ -37,7 +38,7 @@ data = dict(
     workers_per_gpu=4,
     train_dataloader=dict(
         cls=dict(samples_per_gpu=100,persistent_workers=False),
-        pose=dict(samples_per_gpu=20),
+        pose=dict(samples_per_gpu=60),
     ),
     train=dict(
         cls=_cls_base_.data.train,
@@ -86,14 +87,7 @@ cls_teacher = dict(
         loss=dict(type='ArcMargin', out_features=93955)),
     init_cfg=dict(type='Pretrained', checkpoint=teacher_ckpt,map_location='cpu'),
 )
-channel_cfg = dict(
-    num_output_channels=5,
-    dataset_joints=5,
-    dataset_channel=[
-        list(range(5)),
-    ],
-    inference_channel=list(range(5)))
-
+channel_cfg = _pose_base_.channel_cfg
 pose_student = dict(
     type='TopDown',
    backbone=dict(
@@ -105,7 +99,7 @@ pose_student = dict(
         num_joints=channel_cfg['num_output_channels'],
         loss_keypoint=dict(type='SmoothL1Loss', use_target_weight=True)),
     train_cfg=dict(),
-    test_cfg=dict(flip_test=True))
+    test_cfg=dict())
 
 pose_teacher = dict(
     type='TopDown',
@@ -119,7 +113,7 @@ pose_teacher = dict(
         loss_keypoint=dict(type='SmoothL1Loss', use_target_weight=True)),
     load_weights_path=pose_teacher_ckpt,
     train_cfg=dict(),
-    test_cfg=dict(flip_test=True))
+    test_cfg=dict())
 
 
 student = dict(

@@ -1,12 +1,12 @@
 from mmcv import Config
 _cls_base_ = Config.fromfile('configs/hybrid/recog/full_gaussian.py')
-_pose_base_ = Config.fromfile('configs/hybrid/pose/retina_wflw5.py')
+_pose_base_ = Config.fromfile('configs/hybrid/pose/retina.py')
 
 data = dict(
     workers_per_gpu=4,
     train_dataloader=dict(
-        cls=dict(samples_per_gpu=_cls_base_.data.train_dataloader.samples_per_gpu),
-        pose=dict(samples_per_gpu=_pose_base_.data.train_dataloader.samples_per_gpu),
+        cls=dict(samples_per_gpu=100),
+        pose=dict(samples_per_gpu=40),
     ),
     train=dict(
         cls=_cls_base_.data.train,
