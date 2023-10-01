@@ -48,7 +48,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=2000,
     warmup_ratio=0.25)
-checkpoint_config = dict(by_epoch=False, interval=20000)
+checkpoint_config = dict(by_epoch=False, interval=5000)
 runner = dict(type='HybridIterBasedRunner', max_iters=200000)
 evaluation = dict(interval=5000)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
