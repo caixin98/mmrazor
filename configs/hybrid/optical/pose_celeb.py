@@ -52,5 +52,8 @@ checkpoint_config = dict(by_epoch=False, interval=5000)
 runner = dict(type='HybridIterBasedRunner', max_iters=200000)
 evaluation = dict(interval=5000)
 optimizer_config = dict(grad_clip=dict(max_norm=1, norm_type=2))
-
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
+]
 del Config, _cls_base_, _pose_base_
