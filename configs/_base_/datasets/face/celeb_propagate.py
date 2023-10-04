@@ -101,10 +101,12 @@ data = dict(
                 output_dim=[308, 257, 3]),
             # dict(type='TorchAffineRTS', translate = (0.2,0.2),
                 #  scale_factor=0.2, prob=1.0),
-            dict(type="TorchAffineRTS",angle=(0,30),
-                # translate = (0.2,0.2),
+            dict(type="TorchAffineRTS",
+                # angle=(0,30),
+                translate = (0.2,0.2),
+                return_translate=True,
                 # scale_factor=0.2,
-                prob=0.0),
+                prob=1.0),
             dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
@@ -113,7 +115,7 @@ data = dict(
             dict(type='Collect', keys=['img', 'fold', 'label', 'affine_matrix'])
 
         ]),
-    train_dataloader=dict(samples_per_gpu=140),
+    train_dataloader=dict(samples_per_gpu=160),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [

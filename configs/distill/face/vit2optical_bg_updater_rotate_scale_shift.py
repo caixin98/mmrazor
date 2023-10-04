@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_test_bg_updater_rotate_shift.py',
+    '../../_base_/datasets/face/celeb_propagate_test_bg_updater_rotate_scale_shift.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
@@ -14,6 +14,7 @@ optical = dict(
     use_stn=False,
     down="resize",
     noise_type="gaussian",
+    do_affine = True,
     n_psf_mask=1)
 no_optical = dict(
     type='SoftPsfConv',
@@ -61,7 +62,7 @@ teacher = dict(
     head=dict(
         type='IdentityClsHead',
         loss=dict(type='ArcMargin', out_features=93955)),
-        init_cfg=dict(type='Pretrained', checkpoint=teacher_ckpt),
+        init_cfg=dict(type='Pretrained', checkpoint=teacher_ckpt, map_location='cpu'),
 )
 
 algorithm = dict(

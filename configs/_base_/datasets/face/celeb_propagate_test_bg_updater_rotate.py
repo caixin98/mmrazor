@@ -116,7 +116,7 @@ data = dict(
                 out_key='img'),
             dict(type='Collect', keys=['img', 'fold', 'label', 'affine_matrix'])
         ]),
-    train_dataloader=dict(samples_per_gpu=140, persistent_workers=False),
+    train_dataloader=dict(samples_per_gpu=160, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
 custom_hooks = [
