@@ -121,3 +121,7 @@ venv.bak/
 *.out
 batchscript-*
 logs/**
+visualizations/**
+
+*.jpg
+*.png

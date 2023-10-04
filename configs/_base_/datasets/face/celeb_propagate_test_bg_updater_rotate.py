@@ -26,7 +26,7 @@ data = dict(
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='Resize', size=(172, 172)),
-            # dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
+            dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
             dict(type='CenterCrop', crop_size=(112, 96)),
             dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
             dict(
@@ -123,7 +123,6 @@ custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
     dict(type='BGUpdaterHook', max_progress=0.2),
-    dict(type='CropUpdaterHook', max_progress=0.2),
 ]
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(

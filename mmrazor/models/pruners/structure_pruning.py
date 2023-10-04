@@ -487,7 +487,7 @@ class StructurePruner(BaseModule, metaclass=ABCMeta):
         """Find the parent node of a node.
 
         A node in the ``paths`` can be a module name or a operation name such
-        as `concat_140719322997152`. Note that the string of numbers following
+        as `concat_160719322997152`. Note that the string of numbers following
         ``concat`` do not have a particular meaning. It just make the operation
         name unique.
 

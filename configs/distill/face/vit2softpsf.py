@@ -13,6 +13,7 @@ optical = dict(
     requires_grad=True,
     use_stn=False,
     down="resize",
+    do_affine = True,
     noise_type="gaussian",
     n_psf_mask=1)
 no_optical = dict(

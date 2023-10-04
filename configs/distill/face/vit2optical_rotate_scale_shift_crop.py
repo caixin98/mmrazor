@@ -1,5 +1,5 @@
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_test_bg_updater_rotate.py',
+    '../../_base_/datasets/face/celeb_propagate_rotate_scale_shift.py',
 ]
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
 optical = dict(
@@ -14,6 +14,8 @@ optical = dict(
     use_stn=False,
     down="resize",
     noise_type="gaussian",
+    do_affine = True,
+    center_crop_size=[240, 200],
     n_psf_mask=1)
 no_optical = dict(
     type='SoftPsfConv',

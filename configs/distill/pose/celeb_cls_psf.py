@@ -1,12 +1,7 @@
-dataset_info = dict(
-    dataset_name='face_center',
-    paper_info={},  # Optional, to be displayed in the doc
-    keypoint_info={
-        0: dict(name='face_center', id=0, color=[255, 255, 255], type='', swap='face_center'),
-    },
-    skeleton_info={},
-    joint_weights=[1.],
-    sigmas=[]) 
+_base_ = [
+    '../../_base_/datasets/face/face_center.py'
+]
+dataset_info ={{_base_.dataset_info}}
 
 teacher_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/celeb_bg/best_NME_epoch_132.pth"
 # student_ckpt = "/root/caixin/RawSense/nolens_face_align/logs/a_no_optical_face/vit_retina_test_wflw5_no_optical_warmup_shift/best_NME_epoch_927.pth"
@@ -215,7 +210,7 @@ test_pipeline = val_pipeline
 data_root = '/root/caixin/data/celebrity_center/'
 image_root = '/mnt/workspace/RawSense/data/celebrity/'
 data = dict(
-    samples_per_gpu=140,
+    samples_per_gpu=160,
     workers_per_gpu=2,
     val_dataloader=dict(samples_per_gpu=128),
     test_dataloader=dict(samples_per_gpu=128),

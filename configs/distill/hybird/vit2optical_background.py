@@ -32,7 +32,7 @@ no_optical = dict(
 data = dict(
     workers_per_gpu=4,
     train_dataloader=dict(
-        cls=dict(samples_per_gpu=140),
+        cls=dict(samples_per_gpu=160),
     ),
     train=dict(
         cls=_cls_base_.data.train,
