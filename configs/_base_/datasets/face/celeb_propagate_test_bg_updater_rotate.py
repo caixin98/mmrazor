@@ -1,4 +1,3 @@
-#StackImagePair with img and img_wobg
 find_unused_parameters = True
 log_config = dict(interval=100, hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
@@ -8,22 +7,8 @@ resume_from = None
 workflow = [('train', 1)]
 dataset_type = 'Celeb'
 num_classes = 93955
-img_norm_cfg = dict(
-    mean=[127.5, 127.5, 127.5], std=[128.0, 128.0, 128.0], to_rgb=True)
 
-train_dir = '/mnt/workspace/RawSense/data/celebrity/'
-train_imglist = '/mnt/workspace/RawSense/data/celebrity/celebrity_data.txt'
-train_ann_file = '/mnt/workspace/RawSense/data/celebrity/celebrity_label.txt'
-val_dir = '/mnt/workspace/RawSense/data/lfw/'
-data = dict(
-    workers_per_gpu=2,
-    train=dict(
-        type='Celeb',
-        img_prefix='/mnt/workspace/RawSense/data/celebrity/',
-        imglist_root=
-        '/mnt/workspace/RawSense/data/celebrity/celebrity_data.txt',
-        label_root='/mnt/workspace/RawSense/data/celebrity/celebrity_label.txt',
-        pipeline=[
+train_pipeline = [
             dict(type='LoadImageFromFile'),
             dict(type='Resize', size=(172, 172)),
             dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
@@ -39,28 +24,23 @@ data = dict(
                 grayscale=False,
                 input_dim=[112, 96, 3],
                 output_dim=[308, 257, 3]),
-            dict(type="TorchAffineRTS", angle=(0,30),
-                # translate = (0.2,0.2),
-                # scale_factor=0.2,
-                prob=1.0),
+            dict(
+                    type='TorchAffineRTS',
+                    angle=(0, 30),
+                    # scale_factor=0.2,
+                    # translate=(0.2, 0.2),
+                    prob=1.0,
+                ),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
             dict(type='ToTensor', keys=['gt_label']),
             dict(type='StackImagePair', keys=['img', 'img_wobg'], out_key='img'),
             dict(type='Collect', keys=['img', 'gt_label', 'affine_matrix'])
-        ]),
-    val=dict(
-        type='LFW',
-        img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
-        pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
-        pipeline=[
-            dict(type='LoadImagePair'),
-            dict(
-                type='FlipPair',
-                keys=['img1', 'img2'],
-                keys_flip=['img1_flip', 'img2_flip']),
+        ]
+val_pipeline = [
+            dict(type='LoadImageFromFile'),
             dict(
                 type='Propagated',
-                keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
+                keys=['img'],
                 mask2sensor=0.002,
                 scene2mask=0.4,
                 object_height=0.27,
@@ -69,23 +49,20 @@ data = dict(
                 grayscale=False,
                 input_dim=[112, 96, 3],
                 output_dim=[308, 257, 3]),
-            dict(type="TorchAffineRTS",angle=(0,30),
-                # translate = (0.2,0.2),
-                # scale_factor=0.2,
-                prob=1.0),
-            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100)),
-            dict(type='ToTensor', keys=['fold', 'label']),
             dict(
-                type='StackImagePair',
-                keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
-                out_key='img'),
-            dict(type='Collect', keys=['img', 'fold', 'label', 'affine_matrix'])
-        ]),
-    test=dict(
-        type='LFW',
-        img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
-        pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
-        pipeline=[
+                    type='TorchAffineRTS',
+                    angle=(0, 30),
+                    # scale_factor=0.2,
+                    translate=(0.2, 0.2),
+                    prob=1.0,
+                ),
+            dict(type='Affine2label',),
+            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100),is_tensor=True),
+     
+            # dict(type='Collect', keys=['img', 'affine_matrix'],meta_keys=['image_file','affine_matrix'])
+            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file','affine_matrix'])
+]
+test_pipeline = [
             dict(type='LoadImagePair'),
             dict(
                 type='FlipPair',
@@ -104,18 +81,46 @@ data = dict(
                 output_dim=[308, 257, 3]),
             # dict(type='TorchAffineRTS', translate = (0.2,0.2),
                 #  scale_factor=0.2, prob=1.0),
-            dict(type="TorchAffineRTS",angle=(0,30),
-                # translate = (0.2,0.2),
-                # scale_factor=0.2,
+            dict(type="TorchAffineRTS",
+                translate = (0.2,0.2),
+                angle=(0, 0),
+                return_translate=True,
+                scale_factor=0.2,
                 prob=1.0),
-            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100)),
+            # dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100)),
             dict(type='ToTensor', keys=['fold', 'label']),
             dict(
                 type='StackImagePair',
                 keys=['img1', 'img1_flip', 'img2', 'img2_flip'],
                 out_key='img'),
             dict(type='Collect', keys=['img', 'fold', 'label', 'affine_matrix'])
-        ]),
+        ]
+test_pipeline = val_pipeline
+
+data = dict(
+    workers_per_gpu=2,
+    train=dict(
+        type='Celeb',
+        img_prefix='/mnt/workspace/RawSense/data/celebrity/',
+        imglist_root=
+        '/mnt/workspace/RawSense/data/celebrity/celebrity_data.txt',
+        label_root='/mnt/workspace/RawSense/data/celebrity/celebrity_label.txt',
+        pipeline=train_pipeline),
+    val=dict(
+        type='LFW',
+            load_pair = False,
+            use_flip = False,
+            img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
+            pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
+        pipeline=val_pipeline),
+    test=dict(
+        type='LFW',
+            load_pair = False,
+            use_flip = False,
+            img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
+            pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
+            pipeline=test_pipeline
+   ),
     train_dataloader=dict(samples_per_gpu=160, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=64),
     test_dataloader=dict(samples_per_gpu=64))
