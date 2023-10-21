@@ -44,7 +44,7 @@ python -m torch.distributed.launch \
     --master_addr=$MASTER_ADDR \
     --nproc_per_node=$GPUS \
     --master_port=$PORT \
-    tools/mmpose/train_mmpose.py \
+    tools/mmpose/train.py \
     $CONFIG \
     --seed 0 \
     --work-dir $WORRDIR \

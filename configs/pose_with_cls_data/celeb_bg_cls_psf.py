@@ -21,7 +21,8 @@ optical = dict(
     requires_grad=True,
     down="resize",
     noise_type="gaussian",
-    load_weight_path="/root/caixin/RawSense/mmrazor/logs/distill/face/vit2optical_bg_updater_rotate/epoch_90.pth",
+    load_weight_path="logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary/latest.pth",
+    binary=True,
     requires_grad_psf=False,
     n_psf_mask=1)
 
@@ -82,37 +83,32 @@ data_cfg = dict(
     inference_channel=channel_cfg['inference_channel'])
 
 train_pipeline = [
-    dict(type='LoadImageFromFile'),
-    dict(type='TopDownGetBboxCenterScale', padding=2),
-    dict(type='TopDownRandomShiftBboxCenter', shift_factor=0.16, prob=1),
-    dict(type='TopDownRandomFlip', flip_prob=0.5),
-    dict(
-        type='TopDownGetRandomScaleRotation', rot_factor=15,
-        scale_factor=0.3),
-    dict(type='TopDownAffine'),
-    dict(
-        type='Propagated',
-        mask2sensor=0.002,
-        scene2mask=0.4,
-        object_height=None,
-        sensor='IMX250',
-        single_psf=False,
-        grayscale=False,
-        input_dim=[128, 128, 3],
-        output_dim=[308, 257, 3]),
-    dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
-    # dict(
-    #     type='NormalizeTensor',
-    #     mean=[0.485, 0.456, 0.406],
-    #     std=[0.229, 0.224, 0.225]),
-    dict(type='TopDownGenerateTargetRegression'),
-    dict(
-        type='Collect',
-        keys=['img', 'target', 'target_weight'],
-        meta_keys=[
-            'image_file', 'joints_3d', 'joints_3d_visible', 'center', 'scale',
-            'rotation', 'flip_pairs'
-        ]),
+        dict(type='LoadImageFromFile'),
+            dict(type='Resize', size=(172, 172)),
+            dict(type='Pad_celeb', size=(180, 172), padding=(0, 8, 0, 0)),
+            dict(type='CenterCrop', crop_size=(112, 96)),
+            dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
+            dict(
+                type='Propagated',
+                mask2sensor=0.002,
+                scene2mask=0.4,
+                object_height=0.27,
+                sensor='IMX250',
+                single_psf=False,
+                grayscale=False,
+                input_dim=[112, 96, 3],
+                output_dim=[308, 257, 3]),
+            dict(
+                    type='TorchAffineRTS',
+                    angle=(0, 30),
+                    scale_factor=0.2,
+                    translate=(0.2, 0.2),
+                    prob=1.0,
+                    # return_translate=True,
+                ),
+            dict(type='Affine2label',),
+            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
+            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file'])
 ]
 
 val_pipeline = [
@@ -132,14 +128,15 @@ val_pipeline = [
                     type='TorchAffineRTS',
                     angle=(0, 30),
                     scale_factor=0.2,
-                    # translate=(0.2, 0.2),
+                    translate=(0.2, 0.2),
                     prob=1.0,
+                    return_translate=True,
                 ),
             dict(type='Affine2label',),
-            # dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100),is_tensor=True),
+            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100)),
      
             # dict(type='Collect', keys=['img', 'affine_matrix'],meta_keys=['image_file','affine_matrix'])
-            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file','affine_matrix'])
+            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file'])
 ]
 test_pipeline = val_pipeline
 
@@ -160,12 +157,14 @@ data = dict(
     val=dict(
         type='LFW',
             load_pair = False,
+            use_flip = False,
             img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
             pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
         pipeline=val_pipeline),
     test=dict(
         type='LFW',
             load_pair = False,
+            use_flip = False,
             img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
             pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
             pipeline=test_pipeline),

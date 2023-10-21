@@ -13,7 +13,7 @@ from mmcv.utils import digit_version
 from mmpose.core import DistEvalHook, EvalHook
 from mmrazor.core.optimizer import build_optimizers
 from mmpose.core.distributed_wrapper import DistributedDataParallelWrapper
-from mmpose.datasets import build_dataloader, build_dataset
+from mmcls.datasets import build_dataloader, build_dataset
 from mmpose.utils import get_root_logger
 
 try:
