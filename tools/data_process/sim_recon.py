@@ -56,12 +56,13 @@ import multiprocessing
 from tqdm import tqdm
 from scipy.io import loadmat
 import time
-
-def process_img(person_imgs):
+def process_img(person_imgs_noise):
+    person_imgs = person_imgs_noise[0]
+    noise_level = person_imgs_noise[1]
     # dataset_path = '/mnt/workspace/RawSense/data/celebrity'
     # output_path = '/mnt/workspace/RawSense/data/celebrity_flatcam'
     dataset_path = '/mnt/workspace/RawSense/data/lfw/lfw-112X96'
-    output_path = '/mnt/workspace/RawSense/data/lfw/lfw-flatcam'
+    output_path = '/mnt/workspace/RawSense/data/lfw/lfw-flatcam-%ddB'%noise_level
     calib = loadmat('flatcam_calibdata.mat')  # load calibration data
     # flatcam.downsample_calib(calib)
     flatcam.clean_calib(calib)
@@ -81,18 +82,17 @@ def process_img(person_imgs):
             return
         # imaging process
         img = cv2.resize(img, (256, 256))
-        start = time.time()
         flat_img = flatcam.simulate_flatcam(img, calib)
+        flat_img = flatcam.add_noise(flat_img, noise_level)
         recon = flatcam.fcrecon(flat_img, calib, lmbd)
-        print(time.time() - start)
         recon = recon * 255.
         recon = recon.astype(np.float32)
         # recon = cv2.cvtColor(recon, cv2.COLOR_RGB2BGR)
         # save the result
         recon_path = os.path.join(output_path, file_name)
         os.makedirs(os.path.dirname(recon_path), exist_ok=True)
-        cv2.imwrite("test.png", recon)
-        break
+        # cv2.imwrite("test.png", recon)
+        # break
         cv2.imwrite(recon_path, recon)
 
 # def list_files_in_directory(directory_path):
@@ -107,7 +107,7 @@ dataset_path = '/mnt/workspace/RawSense/data/lfw/lfw-112X96'
 # calculate the number of images
 person_imgs = os.listdir(dataset_path)
 person_imgs.sort()
-num_folder = len(person_imgs)  >> 1
+# num_folder = len(person_imgs)  >> 1
 # person_imgs = person_imgs[:num_folder]
 # person_imgs = person_imgs[:num_folder]
 
@@ -116,11 +116,14 @@ num_folder = len(person_imgs)  >> 1
 # num_images = count_files_in_directory(dataset_path)
 # print("total number of images: ", num_images)
 
-# if __name__ == "__main__":
-#     pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count() / 4))
-#     for _ in tqdm(pool.imap_unordered(process_img, person_imgs), total=len(person_imgs)):
-#         pass
 if __name__ == "__main__":
-    for person in tqdm(person_imgs):
-        process_img(person)
-        break
+    pool = multiprocessing.Pool(processes=int(multiprocessing.cpu_count() / 16))
+    for noise_level in [10, 20, 30, 40]:
+        noise_level_list = noise_level * np.ones(len(person_imgs))
+        person_imgs_noise = list(zip(person_imgs, noise_level_list))
+        for _ in tqdm(pool.imap_unordered(process_img, person_imgs_noise), total=len(person_imgs_noise)):
+            pass
+# if __name__ == "__main__":
+#     for person in tqdm(person_imgs):
+#         process_img(person)
+#         break

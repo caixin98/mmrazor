@@ -86,6 +86,7 @@ def bayer2rgb( X_bayer, normalize=True ):
 
     # normalize to be from 0 to 1
     if normalize:
+
         X_rgb = (X_rgb - X_rgb.min()) / (X_rgb.max() - X_rgb.min())
     
     return X_rgb
@@ -101,7 +102,7 @@ def fcrecon( cap, calib, lmbd):
     start = time.time()
 
     Y = make_separable(Y) # let rows and columns have 0-mean
-    print("make_separable", time.time() - start)
+    # print("make_separable", time.time() - start)
 
     X_bayer = np.empty([calib['VL_all'].shape[0], calib['VR_all'].shape[0], 4])
 
@@ -133,10 +134,11 @@ def simulate_flatcam(input_im, calib):
     
     # Resize by forcing larger dimension to be 256
     if input_im.shape[0] > input_im.shape[1]:
-        resize_dim = (256, 256)
+        resize_dim = (256, int(input_im.shape[1] * 256 / input_im.shape[0]))
     else:
-        resize_dim = (256, 256)
+        resize_dim = (int(input_im.shape[0] * 256 / input_im.shape[1]), 256)
     
+
     input_im = img_as_float(resize(input_im, resize_dim, mode='reflect', anti_aliasing=True))
 
     # Pad and remember start and endpoints of actual image
@@ -172,6 +174,20 @@ def simulate_flatcam(input_im, calib):
     # sim_fc[1::2, ::2] = imrotate(np.dot(np.dot(calib['P1gr'], orig_im[:, :, 1]), calib['Q1gr'].T), -calib['angle'], mode='wrap', order=2,reshape=False)
     # sim_fc[::2, ::2] = imrotate(np.dot(np.dot(calib['P1b'], orig_im[:, :, 2]), calib['Q1b'].T), -calib['angle'], mode='wrap',  order=2,reshape=False)
     return sim_fc
+def add_noise(flat_img, noise_level = 20):
+    # add noise on the flatcam measurement
+    # noise_level = 20db
+    # calculate the average intensity of the flatcam measurement
+    # flat_img_min = np.min(flat_img)
+    # flat_img -= flat_img_min
+    flat_var = np.var(flat_img)
+    # avg_intensity = np.mean(flat_img)
+    noise = np.random.normal(0, 1, flat_img.shape) * np.sqrt((10 ** (-noise_level / 10)) * flat_var)
+    flat_img = flat_img + noise 
+    # print(avg_intensity)
+    return flat_img
+
+
 
 def downsample_calib(calib):
     clean_calib(calib)
