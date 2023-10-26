@@ -62,7 +62,7 @@ val_pipeline = [
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100),is_tensor=True),
      
             # dict(type='Collect', keys=['img', 'affine_matrix'],meta_keys=['image_file','affine_matrix'])
-            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file','affine_matrix'])
+            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file'])
 ]
 test_pipeline = [
             dict(type='LoadImagePair'),
@@ -125,7 +125,7 @@ data = dict(
    ),
     train_dataloader=dict(samples_per_gpu=160, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=64),
-    test_dataloader=dict(samples_per_gpu=64))
+    test_dataloader=dict(workers_per_gpu=2,samples_per_gpu=64))
 custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
@@ -142,7 +142,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=10,
     warmup_ratio=1e-6)
-checkpoint_config = dict(interval=10)
+checkpoint_config = dict(interval=1)
 runner = dict(type='EpochBasedRunner', max_epochs=100)
 evaluation = dict(interval=1, metric='accuracy')
 # runner = dict(type='IterBasedRunner', max_iters=200000)

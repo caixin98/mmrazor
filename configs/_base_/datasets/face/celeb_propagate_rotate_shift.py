@@ -59,8 +59,8 @@ val_pipeline = [
             dict(type='Affine2label',),
          
      
-            # dict(type='Collect', keys=['img', 'affine_matrix'],meta_keys=['image_file','affine_matrix'])
-            dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file','affine_matrix'])
+            # dict(type='Collect', keys=['img', 'affine_matrix'],meta_keys=['image_file'])
+            dict(type='Collect', keys=['img', 'affine_matrix', 'target','target_weight'],meta_keys=['image_file'])
 ]
 test_pipeline = [
             dict(type='LoadImagePair'),
@@ -99,6 +99,7 @@ test_pipeline = val_pipeline
 
 data = dict(
     workers_per_gpu=2,
+    
     train=dict(
         type='Celeb',
         img_prefix='/mnt/workspace/RawSense/data/celebrity/',

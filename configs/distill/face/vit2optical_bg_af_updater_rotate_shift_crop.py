@@ -1,7 +1,7 @@
 _base_ = [
     '../../_base_/datasets/face/celeb_propagate_test_bg_updater_rotate_shift.py',
 ]
-teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base/epoch_50.pth"
+teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base_no_pad/latest.pth"
 optical = dict(
     type='SoftPsfConv',
     feature_size=2.76e-05,
