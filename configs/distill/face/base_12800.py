@@ -13,7 +13,7 @@ optical = dict(
     use_stn=False,
     down="resize",
     noise_type="gaussian",
-    expected_light_intensity=6400,
+    expected_light_intensity=12800,
     do_affine = True,
     # requires_grad_psf = False,
     binary=True,
@@ -98,15 +98,14 @@ algorithm = dict(
                 ])
         ]),
 )
-# custom_hooks = dict(_delete_=True)
-# custom_hooks = [
-#     dict(type='VisualConvHook'),
-#     dict(type='VisualAfterOpticalHook'),
-#     dict(type='BGUpdaterHook', max_progress=0.2),
-#     dict(type='AffineUpdaterHook',max_progress=0.2,
-#     apply_translate=True,
-#     apply_scale=False),
-# ]
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
+    dict(type='BGUpdaterHook', max_progress=0.2),
+    dict(type='AffineUpdaterHook',max_progress=0.2,
+    apply_translate=True,
+    apply_scale=True),
+]
 
 
 find_unused_parameters = True
@@ -235,11 +234,7 @@ data = dict(
     train_dataloader=dict(samples_per_gpu=72, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=32),
     test_dataloader=dict(samples_per_gpu=32))
-custom_hooks = [
-    dict(type='VisualConvHook'),
-    dict(type='VisualAfterOpticalHook'),
-    # dict(type='BGUpdaterHook', max_progress=0.2),
-]
+
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(
     policy='CosineAnnealingCooldown',

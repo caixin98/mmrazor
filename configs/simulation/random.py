@@ -1,7 +1,7 @@
 
 teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base_no_pad/latest.pth"
 optical = dict(
-    type='SoftPsfConv',
+    type='SoftPsfConvDiff',
     feature_size=2.76e-05,
     sensor='IMX250',
     input_shape=[3, 308, 257],
@@ -13,9 +13,9 @@ optical = dict(
     use_stn=False,
     down="resize",
     noise_type="gaussian",
-    expected_light_intensity=6400,
+    expected_light_intensity=12800,
     do_affine = True,
-    # requires_grad_psf = False,
+    requires_grad_psf = False,
     binary=True,
     n_psf_mask=1)
 no_optical = dict(
@@ -98,15 +98,15 @@ algorithm = dict(
                 ])
         ]),
 )
-# custom_hooks = dict(_delete_=True)
-# custom_hooks = [
-#     dict(type='VisualConvHook'),
-#     dict(type='VisualAfterOpticalHook'),
-#     dict(type='BGUpdaterHook', max_progress=0.2),
-#     dict(type='AffineUpdaterHook',max_progress=0.2,
-#     apply_translate=True,
-#     apply_scale=False),
-# ]
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook',
+         visual_num = 1),
+    dict(type='BGUpdaterHook', max_progress=0.2),
+    dict(type='AffineUpdaterHook',max_progress=0.2,
+    apply_translate=True,
+    apply_scale=True),
+]
 
 
 find_unused_parameters = True
@@ -232,14 +232,10 @@ data = dict(
             pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
             pipeline=test_pipeline
    ),
-    train_dataloader=dict(samples_per_gpu=72, persistent_workers=False),
+    train_dataloader=dict(samples_per_gpu=2, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=32),
     test_dataloader=dict(samples_per_gpu=32))
-custom_hooks = [
-    dict(type='VisualConvHook'),
-    dict(type='VisualAfterOpticalHook'),
-    # dict(type='BGUpdaterHook', max_progress=0.2),
-]
+
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(
     policy='CosineAnnealingCooldown',
