@@ -88,12 +88,12 @@ algorithm = dict(
                     dict(
                         type='DistanceWiseRKD',
                         name='distance_wise_loss',
-                        loss_weight=100.0,
+                        loss_weight=00.0,
                         with_l2_norm=True),
                     dict(
                         type='AngleWiseRKD',
                         name='angle_wise_loss',
-                        loss_weight=200.0,
+                        loss_weight=00.0,
                         with_l2_norm=True),
                 ])
         ]),
