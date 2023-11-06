@@ -4,8 +4,11 @@ import numpy as np
 import cv2
 # psf_file = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary_fix/visualizations/66400_mask.png"
 # save_file = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary_fix/visualizations/66400_mask.npy"
-psf_file = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary/visualizations/171100_mask.png"
-save_file = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary/visualizations/171100_mask.npy"
+# psf_file = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary/visualizations/171100_mask.png"
+# save_file = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary/visualizations/171100_mask.npy"
+
+psf_file = "logs/distill/face/base_12800_no_align/visualizations/399300_psf.png"
+save_file = "logs/distill/face/base_12800_no_align/visualizations/399300_psf.npy"
 psf = cv2.imread(psf_file, cv2.IMREAD_GRAYSCALE)
 psf = psf.astype(np.float32) / 255
 psf = psf.astype(bool)

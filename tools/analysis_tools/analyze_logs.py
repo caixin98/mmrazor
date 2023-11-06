@@ -5,7 +5,7 @@ import re
 
 import matplotlib.pyplot as plt
 import numpy as np
-
+import json
 from mmcls.utils import load_json_log
 
 TEST_METRICS = ('precision', 'recall', 'f1_score', 'support', 'mAP', 'CP',
@@ -84,10 +84,18 @@ def plot_phase_val(metric, log_dict, epochs, curve_label, json_log):
  
     xs = [e for e in epochs if metric in log_dict[e]]
 
-    ys = [np.average(log_dict[e][metric]) for e in xs if metric in log_dict[e]]
+    ys = [np.average(log_dict[e][metric]) * 100 for e in xs if metric in log_dict[e]]
     assert len(xs) > 0, (f'{json_log} does not contain metric {metric}')
     plt.xlabel('Epochs')
     plt.plot(xs, ys, label=curve_label, linewidth=2)
+    # save xs and ys into a new json log
+    save_dict = {"xs":xs[:50], "ys":ys[:50]}
+    save_path = json_log.split('.json')[0] +"_" + metric + '.json'
+    with open(save_path, 'w') as f:
+        json.dump(save_dict, f)
+    print(f'save curve to: {save_path}')
+
+
 
 
 def plot_curve_helper(log_dicts, metrics, args, legend):

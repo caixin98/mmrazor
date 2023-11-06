@@ -8,14 +8,14 @@ optical = dict(
     scene2mask=0.4,
     mask2sensor=0.002,
     target_dim=[240, 200],
-    # center_crop_size=[240, 200],
+    center_crop_size=[240, 200],
     requires_grad=True,
     use_stn=False,
     down="resize",
     noise_type="gaussian",
-    expected_light_intensity=12800,
-    # do_affine = True,
-    # requires_grad_psf = False,
+    expected_light_intensity=6400,
+    do_affine = True,
+    requires_grad_psf = False,
     binary=True,
     n_psf_mask=1)
 no_optical = dict(
@@ -88,23 +88,24 @@ algorithm = dict(
                     dict(
                         type='DistanceWiseRKD',
                         name='distance_wise_loss',
-                        loss_weight=100.0,
+                        loss_weight=00.0,
                         with_l2_norm=True),
                     dict(
                         type='AngleWiseRKD',
                         name='angle_wise_loss',
-                        loss_weight=200.0,
+                        loss_weight=00.0,
                         with_l2_norm=True),
                 ])
         ]),
 )
+custom_hooks = dict(_delete_=True)
 custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
     dict(type='BGUpdaterHook', max_progress=0.2),
     dict(type='AffineUpdaterHook',max_progress=0.2,
     apply_translate=True,
-    apply_scale=True),
+    apply_scale=False),
 ]
 
 
@@ -137,7 +138,7 @@ train_pipeline = [
             dict(
                     type='TorchAffineRTS',
                     angle=(0, 30),
-                    scale_factor=0.2,
+                    # scale_factor=0.2,
                     translate=(0.2, 0.2),
                     prob=1.0,
                 ),
@@ -162,7 +163,7 @@ val_pipeline = [
             dict(
                     type='TorchAffineRTS',
                     angle=(0, 30),
-                    scale_factor=0.2,
+                    # scale_factor=0.2,
                     translate=(0.2, 0.2),
                     prob=1.0,
                 ),

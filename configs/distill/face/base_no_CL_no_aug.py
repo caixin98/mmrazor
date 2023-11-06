@@ -8,13 +8,13 @@ optical = dict(
     scene2mask=0.4,
     mask2sensor=0.002,
     target_dim=[240, 200],
-    # center_crop_size=[240, 200],
+    center_crop_size=[240, 200],
     requires_grad=True,
     use_stn=False,
     down="resize",
     noise_type="gaussian",
-    expected_light_intensity=12800,
-    # do_affine = True,
+    expected_light_intensity=6400,
+    do_affine = True,
     # requires_grad_psf = False,
     binary=True,
     n_psf_mask=1)
@@ -98,14 +98,15 @@ algorithm = dict(
                 ])
         ]),
 )
-custom_hooks = [
-    dict(type='VisualConvHook'),
-    dict(type='VisualAfterOpticalHook'),
-    dict(type='BGUpdaterHook', max_progress=0.2),
-    dict(type='AffineUpdaterHook',max_progress=0.2,
-    apply_translate=True,
-    apply_scale=True),
-]
+# custom_hooks = dict(_delete_=True)
+# custom_hooks = [
+#     dict(type='VisualConvHook'),
+#     dict(type='VisualAfterOpticalHook'),
+#     dict(type='BGUpdaterHook', max_progress=0.2),
+#     dict(type='AffineUpdaterHook',max_progress=0.2,
+#     apply_translate=True,
+#     apply_scale=False),
+# ]
 
 
 find_unused_parameters = True
@@ -137,9 +138,9 @@ train_pipeline = [
             dict(
                     type='TorchAffineRTS',
                     angle=(0, 30),
-                    scale_factor=0.2,
+                    # scale_factor=0.2,
                     translate=(0.2, 0.2),
-                    prob=1.0,
+                    prob=0.0,
                 ),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
             dict(type='ToTensor', keys=['gt_label']),
@@ -162,7 +163,7 @@ val_pipeline = [
             dict(
                     type='TorchAffineRTS',
                     angle=(0, 30),
-                    scale_factor=0.2,
+                    # scale_factor=0.2,
                     translate=(0.2, 0.2),
                     prob=1.0,
                 ),
@@ -234,7 +235,11 @@ data = dict(
     train_dataloader=dict(samples_per_gpu=72, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=32),
     test_dataloader=dict(samples_per_gpu=32))
-
+custom_hooks = [
+    dict(type='VisualConvHook'),
+    dict(type='VisualAfterOpticalHook'),
+    # dict(type='BGUpdaterHook', max_progress=0.2),
+]
 optimizer = dict(type='AdamW',lr=5e-4, weight_decay=0.05)
 lr_config = dict(
     policy='CosineAnnealingCooldown',
