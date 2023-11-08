@@ -1,8 +1,8 @@
 
 _base_ = [
-    '../../_base_/datasets/face/celeb_propagate_test_bg_updater_rotate_scale_shift.py',
+    '../../_base_/datasets/face/celeb_propagate_test_bg_updater_rotate_scale_shift_flat.py',
 ]
-cls_checkpoint = "/root/caixin/RawSense/mmrazor/logs/distill/face/base_12800/latest.pth"
+cls_checkpoint = "/root/caixin/RawSense/mmrazor/logs/distill/face/base_12800/epoch_80.pth"
 pose_checkpoint = "/root/caixin/RawSense/mmrazor/logs/pose_with_cls_data/base_12800/latest.pth"
 
 cls_optical = dict(

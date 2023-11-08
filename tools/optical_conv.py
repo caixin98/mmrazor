@@ -4,14 +4,14 @@ from mmcls.datasets.pipelines import Compose
 import os
 from torchvision.utils import save_image
 cfg = Config.fromfile('configs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary_fix.py')
-pipeline = Compose(cfg.data.val.pipeline)
 # cfg.algorithm.architecture.model.backbone.optical.load_weight_path = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary_fix/latest.pth"
 cfg.algorithm.architecture.model.backbone.optical.expected_light_intensity = 1
 
-def optical_conv(source_img_path,cfg):
+def optical_conv(source_img_path,cfg,target_dir = "vis_optical"):
     source_filename = os.path.basename(source_img_path)
     source_dir = os.path.dirname(source_img_path)
-    target_dir = "vis_optical"
+    pipeline = Compose(cfg.data.val.pipeline)
+    
     optical = build_optical(cfg.algorithm.architecture.model.backbone.optical)
     source_dict = dict(img_info=dict(filename=source_filename))
     source_dict['img_prefix'] = source_dir

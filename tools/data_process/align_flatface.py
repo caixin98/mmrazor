@@ -1,7 +1,7 @@
 # do the face alignment for the flat face dataset
 
-data_root = '/mnt/workspace/RawSense/data/flatface/webcam'
-output_root = '/mnt/workspace/RawSense/data/flatface_aligned'
+data_root = '/mnt/workspace/RawSense/data/flatface/fc_recon'
+output_root = '/mnt/workspace/RawSense/data/flatface/fc_recon_aligned'
 import face_alignment
 from skimage import io
 import os
@@ -44,14 +44,18 @@ for person in person_list:
         img_list = os.listdir(os.path.join(data_root, person))
         img_list.sort()
         for img in img_list:
+            output_path = os.path.join(output_root, person, img)
+            if os.path.exists(output_path):
+                continue
             img_path = os.path.join(data_root, person, img)
             print(img_path)
             input = io.imread(img_path)
             preds = fa.get_landmarks(input)
             if preds is not None:
                 face = align_face(input, preds[0])
-                output_path = os.path.join(output_root, person, img)
+               
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
                 io.imsave(output_path, face)
             else:
                 print('no face detected in {}'.format(img_path))
+                io.imsave(output_path, input)
