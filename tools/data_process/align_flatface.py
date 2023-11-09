@@ -1,7 +1,7 @@
 # do the face alignment for the flat face dataset
 
-data_root = '/mnt/workspace/RawSense/data/flatface/fc_recon'
-output_root = '/mnt/workspace/RawSense/data/flatface/fc_recon_aligned'
+data_root = '/mnt/workspace/RawSense/data/flatface/webcam'
+output_root = '/mnt/workspace/RawSense/data/flatface_aligned'
 import face_alignment
 from skimage import io
 import os
