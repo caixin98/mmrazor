@@ -225,11 +225,22 @@ data = dict(
             pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
         pipeline=val_pipeline),
     test=dict(
-        type='LFW',
+        # type='LFW',
+        #     load_pair = False,
+        #     use_flip = False,
+        #     img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
+        #     pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
+        #     pipeline=test_pipeline
+
+           type='FlatFace',
+
             load_pair = False,
             use_flip = False,
-            img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
-            pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
+            # img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
+            # pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
+
+            img_prefix='/mnt/workspace/RawSense/data/flatface_aligned',
+            pair_file='/mnt/workspace/RawSense/data/flatface/pairs.txt',
             pipeline=test_pipeline
    ),
     train_dataloader=dict(samples_per_gpu=72, persistent_workers=False),
