@@ -14,8 +14,8 @@ optical = dict(
     down="resize",
     noise_type="gaussian",
     expected_light_intensity=12800,
-    do_affine = True,
-    requires_grad_psf = False,
+    # do_affine = True,
+    # requires_grad_psf = False,
     binary=True,
     n_psf_mask=1)
 no_optical = dict(
@@ -98,14 +98,13 @@ algorithm = dict(
                 ])
         ]),
 )
-# custom_hooks = dict(_delete_=True)
 custom_hooks = [
     dict(type='VisualConvHook'),
     dict(type='VisualAfterOpticalHook'),
     dict(type='BGUpdaterHook', max_progress=0.2),
     dict(type='AffineUpdaterHook',max_progress=0.2,
     apply_translate=True,
-    apply_scale=False),
+    apply_scale=True),
 ]
 
 
@@ -138,9 +137,9 @@ train_pipeline = [
             dict(
                     type='TorchAffineRTS',
                     angle=(0, 30),
-                    # scale_factor=0.2,
+                    scale_factor=0.2,
                     translate=(0.2, 0.2),
-                    prob=1.0,
+                    prob=0.0,
                 ),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
             dict(type='ToTensor', keys=['gt_label']),
@@ -163,9 +162,9 @@ val_pipeline = [
             dict(
                     type='TorchAffineRTS',
                     angle=(0, 30),
-                    # scale_factor=0.2,
+                    scale_factor=0.2,
                     translate=(0.2, 0.2),
-                    prob=1.0,
+                    prob=0.0,
                 ),
             dict(type='Affine2label',),
             dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100),is_tensor=True),
@@ -225,22 +224,11 @@ data = dict(
             pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
         pipeline=val_pipeline),
     test=dict(
-        # type='LFW',
-        #     load_pair = False,
-        #     use_flip = False,
-        #     img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
-        #     pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
-        #     pipeline=test_pipeline
-
-           type='FlatFace',
-
+        type='LFW',
             load_pair = False,
             use_flip = False,
-            # img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
-            # pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
-
-            img_prefix='/mnt/workspace/RawSense/data/flatface_aligned',
-            pair_file='/mnt/workspace/RawSense/data/flatface/pairs.txt',
+            img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
+            pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
             pipeline=test_pipeline
    ),
     train_dataloader=dict(samples_per_gpu=72, persistent_workers=False),
