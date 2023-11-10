@@ -126,3 +126,4 @@ visualizations/**
 *.jpg
 *.png
 *.npy
+*.cp
