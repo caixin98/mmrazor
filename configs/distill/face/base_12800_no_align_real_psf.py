@@ -1,5 +1,5 @@
 
-teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base_no_pad/latest.pth"
+teacher_ckpt = "/root/caixin/RawSense/nolens_mmcls/logs/a_no_optical_face/full_with_base_no_pad/epoch_40.pth"
 optical = dict(
     type='LoadPsf',
     feature_size=2.76e-05,
@@ -8,16 +8,16 @@ optical = dict(
     scene2mask=0.4,
     mask2sensor=0.002,
     target_dim=[240, 200],
-    center_crop_size=[240, 200],
+    # center_crop_size=[240, 200],
     requires_grad=True,
     use_stn=False,
     down="resize",
     noise_type="gaussian",
     expected_light_intensity=12800,
-    do_affine = True,
-    requires_grad_psf = False,
+    load_psf_path = "psf/1113/psf.png",
+    # do_affine = True,
+    # requires_grad_psf = False,
     binary=True,
-    load_psf_path = "logs/distill/face/vit2optical_bg_af_updater_rotate_scale_shift_crop_binary_fix/visualizations/66400_mask.png",
     n_psf_mask=1)
 no_optical = dict(
     type='SoftPsfConv',
@@ -101,8 +101,7 @@ algorithm = dict(
 )
 custom_hooks = [
     dict(type='VisualConvHook'),
-    dict(type='VisualAfterOpticalHook',
-         visual_num = 1),
+    dict(type='VisualAfterOpticalHook'),
     dict(type='BGUpdaterHook', max_progress=0.2),
     dict(type='AffineUpdaterHook',max_progress=0.2,
     apply_translate=True,
@@ -141,9 +140,9 @@ train_pipeline = [
                     angle=(0, 30),
                     scale_factor=0.2,
                     translate=(0.2, 0.2),
-                    prob=0.0,
+                    prob=1.0,
                 ),
-            # dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
+            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/train',size = (100, 100)),
             dict(type='ToTensor', keys=['gt_label']),
             dict(type='StackImagePair', keys=['img', 'img_nopad'], out_key='img'),
             dict(type='Collect', keys=['img', 'gt_label', 'affine_matrix'])
@@ -166,10 +165,10 @@ val_pipeline = [
                     angle=(0, 30),
                     scale_factor=0.2,
                     translate=(0.2, 0.2),
-                    prob=0.0,
+                    prob=1.0,
                 ),
             dict(type='Affine2label',),
-            # dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100),is_tensor=True),
+            dict(type='AddBackground', img_dir='/mnt/workspace/RawSense/data/BG-20k/testval',size = (100, 100),is_tensor=True),
      
             # dict(type='Collect', keys=['img', 'affine_matrix'],meta_keys=['image_file','affine_matrix'])
             dict(type='Collect', keys=['img', 'affine_matrix','target','target_weight'],meta_keys=['image_file'])
@@ -226,14 +225,16 @@ data = dict(
             pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
         pipeline=val_pipeline),
     test=dict(
-        type='LFW',
-            load_pair = False,
-            use_flip = False,
-            img_prefix='/mnt/workspace/RawSense/data/lfw/lfw-112X96',
-            pair_file='/mnt/workspace/RawSense/data/lfw/pairs.txt',
-            pipeline=test_pipeline
+        type='FlatFace',
+
+        load_pair = False,
+        use_flip = False,
+  
+        img_prefix='/mnt/workspace/RawSense/data/flatface_aligned',
+        pair_file='/mnt/workspace/RawSense/data/flatface/pairs.txt',
+        pipeline=test_pipeline
    ),
-    train_dataloader=dict(samples_per_gpu=2, persistent_workers=False),
+    train_dataloader=dict(samples_per_gpu=72, persistent_workers=False),
     val_dataloader=dict(samples_per_gpu=32),
     test_dataloader=dict(samples_per_gpu=32))
 

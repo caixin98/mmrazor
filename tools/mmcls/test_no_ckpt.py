@@ -28,7 +28,7 @@ except ImportError:
 def parse_args():
     parser = argparse.ArgumentParser(description='mmcls test model')
     parser.add_argument('config', help='test config file path')
-    parser.add_argument('checkpoint', help='checkpoint file')
+
     parser.add_argument('--out', help='output result file')
     out_options = ['accuracy']
     parser.add_argument(
@@ -108,8 +108,7 @@ def parse_args():
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
 
-    if args.out is None:
-        args.out = os.path.splitext(args.checkpoint)[0] + '.pkl'
+
     assert args.metrics or args.out, \
         'Please specify at least one of output path and evaluation metrics.'
 
@@ -181,18 +180,14 @@ def main():
     fp16_cfg = cfg.get('fp16', None)
     if fp16_cfg is not None:
         wrap_fp16_model(model)
-    if args.checkpoint is not None:
-        checkpoint = load_checkpoint(
-            algorithm, args.checkpoint, map_location='cpu')
+ 
 
-    if 'CLASSES' in checkpoint.get('meta', {}):
-        CLASSES = checkpoint['meta']['CLASSES']
-    else:
-        from mmcls.datasets import ImageNet
-        warnings.simplefilter('once')
-        warnings.warn('Class names are not saved in the checkpoint\'s '
-                      'meta data, use imagenet by default.')
-        CLASSES = ImageNet.CLASSES
+ 
+    from mmcls.datasets import Celeb
+    warnings.simplefilter('once')
+    warnings.warn('Class names are not saved in the checkpoint\'s '
+                    'meta data, use imagenet by default.')
+    CLASSES = Celeb.CLASSES
 
     if not distributed:
         if args.device == 'cpu':
@@ -212,7 +207,7 @@ def main():
                     'is not lower than v1.4.4'
         model.CLASSES = CLASSES
         show_kwargs = {} if args.show_options is None else args.show_options
-        outputs = single_gpu_test(algorithm, data_loader, args.show, show_dir = args.show_dir,
+        outputs = single_gpu_test(algorithm, data_loader, args.show, args.show_dir,
                                   **show_kwargs)
     else:
         algorithm = MMDistributedDataParallel(
@@ -231,7 +226,6 @@ def main():
                 results=outputs,
                 metric=args.metrics,
                 metric_options=args.metric_options,
-                res_folder=args.out,
                 logger=logger)
             results.update(eval_results)
             for k, v in eval_results.items():
@@ -260,8 +254,8 @@ def main():
         #         else:
         #             for key in args.out_items:
         #                 results[key] = res_items[key]
-            # print(f'\ndumping results to {args.out}')
-            # mmcv.dump(results, args.out)
+            print(f'\ndumping results to {args.out}')
+            mmcv.dump(results, args.out)
 
 
 if __name__ == '__main__':

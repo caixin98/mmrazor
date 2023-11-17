@@ -7,7 +7,8 @@ SHOWWORRDIR=$(echo visualizations/${CONFIG%.*} | sed 's/configs\///g')
 mkdir -p $SHOWWORRDIR
 echo "visualizations dir: $SHOWWORRDIR"
 
-python tools/mmpose/test.py \
+python tools/mmcls/test.py \
     $CONFIG \
     $CHECKPOINT \
     --show-dir $SHOWWORRDIR \
+     --metrics accuracy \
