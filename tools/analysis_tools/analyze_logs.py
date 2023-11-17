@@ -74,7 +74,7 @@ def plot_phase_train(metric, log_dict, epochs, curve_label, json_log):
     xs = np.concatenate(xs)
     ys = np.concatenate(ys)
     print(xs.shape, ys.shape)
-    save_dict = {"ys":list(ys[::50])}
+    save_dict = {"ys":list(ys[:2500:50])}
     save_path = json_log.split('.json')[0] +"_" + "loss" + '.json'
     print(save_dict,save_path)
     with open(save_path, 'w') as f:
